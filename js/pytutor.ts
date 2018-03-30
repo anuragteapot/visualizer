@@ -29,7 +29,7 @@
 
 require('./lib/d3.v2.min.js');
 require('./lib/jquery-3.0.0.min.js');
-require('./lib/jquery.jsPlumb-1.3.10-all-min.js'); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR 
+require('./lib/jquery.jsPlumb-1.3.10-all-min.js'); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR
 require('./lib/jquery-ui-1.11.4/jquery-ui.js');
 require('./lib/jquery-ui-1.11.4/jquery-ui.css');
 require('./lib/jquery.ba-bbq.js'); // contains slight pgbovine modifications
@@ -400,11 +400,7 @@ export class ExecutionVisualizer {
 
       // add an extra label to link back to the main site, so that viewers
       // on the embedded page know that they're seeing an OPT visualization
-      base.append('<div style="font-size: 8pt; margin-bottom: 10px;"><a href="http://pythontutor.com" target="_blank" style="color: #3D58A2;">Python Tutor</a> by <a href="https://twitter.com/pgbovine" target="_blank" style="color: #3D58A2;">Philip Guo</a>. Support with a <a href="http://pgbovine.net/support.htm" target="_blank">small donation</a>.</div>');
       base.find('#codeFooterDocs').hide(); // cut out extraneous docs
-    } else {
-      // also display credits:
-      base.append('<div style="font-size: 9pt; margin-top: 5px; margin-bottom: 10px;">Created by <a href="https://twitter.com/pgbovine" target="_blank">@pgbovine</a>. Support with a <a href="http://pgbovine.net/support.htm" target="_blank">small donation</a>.</div>');
     }
 
     // not enough room for these extra buttons ...
@@ -770,12 +766,12 @@ export class ExecutionVisualizer {
         else if (obj instanceof Array && obj[0] == "CHAR-LITERAL") {
           var asc = obj[1].charCodeAt(0);
           var ch = obj[1];
-          
+
           // default
           var show = asc.toString(16);
           while (show.length < 4) show = "0" + show;
           show = "\\u" + show;
-          
+
           if (ch == "\n") show = "\\n";
           else if (ch == "\r") show = "\\r";
           else if (ch == "\t") show = "\\t";
@@ -785,7 +781,7 @@ export class ExecutionVisualizer {
           else if (ch == "\"") show = "\\\"";
           else if (ch == "\\") show = "\\\\";
           else if (asc >= 32) show = ch;
-          
+
           // stringObj to make monospace
           d3DomElement.append('<span class="stringObj">\'' + show + '\'</span>');
         }
@@ -795,7 +791,7 @@ export class ExecutionVisualizer {
       });
 
     this.add_pytutor_hook(
-      "isPrimitiveType", 
+      "isPrimitiveType",
       function(args) {
         var obj = args.obj;
         if ((obj instanceof Array && obj[0] == "VOID")
@@ -820,14 +816,14 @@ export class ExecutionVisualizer {
             escapeHtml(myViz.params.stdin.substr(stdinPosition));
           myViz.domRoot.find('#stdinShow').html(stdinContent);
         }
-        return [false]; 
+        return [false];
       });
 
     this.add_pytutor_hook(
       "end_render",
       function(args) {
         var myViz = args.myViz;
-        
+
         if (myViz.params.stdin && myViz.params.stdin != "") {
           var stdinHTML = '<div id="stdinWrap">stdin:<pre id="stdinShow" style="border:1px solid gray"></pre></div>';
           myViz.domRoot.find('#dataViz').append(stdinHTML); // TODO: leaky abstraction with #dataViz
@@ -855,12 +851,12 @@ export class ExecutionVisualizer {
         var myViz = args.myViz;
         var stepNum = args.stepNum;
 
-        if (!(obj[0] == 'LIST' || obj[0] == 'QUEUE' || obj[0] == 'STACK')) 
+        if (!(obj[0] == 'LIST' || obj[0] == 'QUEUE' || obj[0] == 'STACK'))
           return [false]; // didn't handle
 
         var label = obj[0].toLowerCase();
         var visibleLabel = {list:'array', queue:'queue', stack:'stack'}[label];
-        
+
         if (obj.length == 1) {
           d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + 'empty ' + visibleLabel + '</div>');
           return [true]; //handled
@@ -869,22 +865,22 @@ export class ExecutionVisualizer {
         d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + visibleLabel + '</div>');
         d3DomElement.append('<table class="' + label + 'Tbl"></table>');
         var tbl = d3DomElement.children('table');
-        
+
         if (obj[0] == 'LIST') {
           tbl.append('<tr></tr><tr></tr>');
           var headerTr = tbl.find('tr:first');
           var contentTr = tbl.find('tr:last');
-          
+
           // i: actual index in json object; ind: apparent index
           for (var i=1, ind=0; i<obj.length; i++) {
             var val = obj[i];
             var elide = val instanceof Array && val[0] == 'ELIDE';
-            
+
             // add a new column and then pass in that newly-added column
             // as d3DomElement to the recursive call to child:
             headerTr.append('<td class="' + label + 'Header"></td>');
             headerTr.find('td:last').append(elide ? "&hellip;" : ind);
-            
+
             contentTr.append('<td class="'+ label + 'Elt"></td>');
             if (!elide) {
               myViz.renderNestedObject(val, stepNum, contentTr.find('td:last'));
@@ -900,7 +896,7 @@ export class ExecutionVisualizer {
        // Stack and Queue handling code by Will Gwozdz
         /* The table produced for stacks and queues is formed slightly differently than the others,
        missing the header row. Two rows made the dashed border not line up properly */
-        if (obj[0] == 'STACK') { 
+        if (obj[0] == 'STACK') {
           tbl.append('<tr></tr><tr></tr>');
           var contentTr = tbl.find('tr:last');
           contentTr.append('<td class="'+ label + 'FElt">'+'<span class="stringObj symbolic">&#8596;</span>'+'</td>');
@@ -911,18 +907,18 @@ export class ExecutionVisualizer {
           });
           contentTr.append('<td class="'+ label + 'LElt">'+'</td>');
         }
-        
-        if (obj[0] == 'QUEUE') { 
+
+        if (obj[0] == 'QUEUE') {
           tbl.append('<tr></tr><tr></tr>');
-          var contentTr = tbl.find('tr:last');    
+          var contentTr = tbl.find('tr:last');
           // Add arrows showing in/out direction
-          contentTr.append('<td class="'+ label + 'FElt">'+'<span class="stringObj symbolic">&#8592;</span></td>');    
+          contentTr.append('<td class="'+ label + 'FElt">'+'<span class="stringObj symbolic">&#8592;</span></td>');
           $.each(obj, function(ind, val) {
             if (ind < 1) return; // skip type tag and ID entry
             contentTr.append('<td class="'+ label + 'Elt"></td>');
             myViz.renderNestedObject(val, stepNum, contentTr.find('td:last'));
           });
-          contentTr.append('<td class="'+ label + 'LElt">'+'<span class="stringObj symbolic">&#8592;</span></td>');    
+          contentTr.append('<td class="'+ label + 'LElt">'+'<span class="stringObj symbolic">&#8592;</span></td>');
         }
 
         return [true]; // did handle
@@ -1119,14 +1115,9 @@ class DataVisualizer {
            <tr>
              <td id="stack_td">
                <div id="globals_area">
-                 <div id="stackHeader">${this.getRealLabel("Frames")}</div>
+                 <div id="stackHeader">Output ${this.getRealLabel("Frames")}</div>
                </div>
                <div id="stack"></div>
-             </td>
-             <td id="heap_td">
-               <div id="heap">
-                 <div id="heapHeader">${this.getRealLabel("Objects")}</div>
-               </div>
              </td>
            </tr>
          </table>
@@ -2556,7 +2547,7 @@ class DataVisualizer {
 
         if (isValidPtr) {
           // for pointers, put cdataId in the header
-          d3DomElement.append('<div id="' + cdataId + '" class="cdataHeader">' + leader + typeName + '</div>');
+          //d3DomElement.append('<div id="' + cdataId + '" class="cdataHeader">' + leader + typeName + '</div>');
 
           var ptrVal = obj[3];
 
@@ -2584,7 +2575,7 @@ class DataVisualizer {
         } else {
           // for non-pointers, put cdataId on the element itself, so that
           // pointers can point directly at the element, not the header
-          d3DomElement.append('<div class="cdataHeader">' + leader + typeName + '</div>');
+        //  d3DomElement.append('<div class="cdataHeader">' + leader + typeName + '</div>');
 
           var rep = '';
           if (typeof obj[3] === 'string') {
@@ -2704,8 +2695,8 @@ class DataVisualizer {
     }
 
     var hook_result = myViz.owner.try_hook("renderCompoundObject",
-                               {objID:objID, d3DomElement:d3DomElement, 
-                                isTopLevel:isTopLevel, obj:obj, 
+                               {objID:objID, d3DomElement:d3DomElement,
+                                isTopLevel:isTopLevel, obj:obj,
                                 typeLabelPrefix:typeLabelPrefix,
                                 stepNum:stepNum,
                                 myViz:myViz});
@@ -3123,7 +3114,7 @@ class ProgramOutputBox {
 
     var outputsHTML =
       '<div id="progOutputs">\
-         <div id="printOutputDocs">Print output (drag lower right corner to resize)</div>\n\
+         <div id="printOutputDocs">Print output</div>\n\
          <textarea id="pyStdout" cols="40" rows="5" wrap="off" readonly></textarea>\
        </div>';
 
@@ -3215,7 +3206,7 @@ class CodeDisplay {
          <div id="editCodeLinkDiv"><a id="editBtn">Edit this code</a>\
          </div>\
          <div id="legendDiv"/>\
-         <div id="codeFooterDocs">Click a line of code to set a breakpoint; use the Back and Forward buttons to jump there.</div>\
+         <div id="codeFooterDocs"></div>\
        </div>';
 
     this.domRoot.append(codeDisplayHTML);
@@ -3279,13 +3270,13 @@ class CodeDisplay {
         if (this.owner.params.embeddedMode) {
           this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
         } else {
-          this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)<br/><font color="#e93f34">EXPERIMENTAL!</font> <a href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md" target="_blank">known bugs/limitations</a>');
+          this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
         }
       } else if (lang === 'cpp') {
         if (this.owner.params.embeddedMode) {
           this.domRoot.find('#langDisplayDiv').html('C++ (gcc 4.8, C++11)');
         } else {
-          this.domRoot.find('#langDisplayDiv').html('C++ (gcc 4.8, C++11)<br/><font color="#e93f34">EXPERIMENTAL!</font> <a href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md" target="_blank">known bugs/limitations</a>');
+          this.domRoot.find('#langDisplayDiv').html('C++ (gcc 4.8, C++11)');
         }
       } else {
         this.domRoot.find('#langDisplayDiv').hide();
@@ -3572,18 +3563,22 @@ class NavigationController {
                      <div id="executionSlider"/>\
                      <div id="executionSliderFooter"/>\
                      <div id="vcrControls">\
-                       <button id="jmpFirstInstr", type="button">&lt;&lt; First</button>\
-                       <button id="jmpStepBack", type="button">&lt; Back</button>\
-                       <span id="curInstr">Step ? of ?</span>\
-                       <button id="jmpStepFwd", type="button">Forward &gt;</button>\
-                       <button id="jmpLastInstr", type="button">Last &gt;&gt;</button>\
+                     <span id="curInstr">Step ? of ?</span><br>\
+                       <button id="jmpFirstInstr", type="button" onclick="console()">&lt;&lt; First</button>\
+                       <button id="jmpStepBack", type="button" onclick="console()">&lt; Back</button>\
+                       <button id="jmpStepFwd", type="button" onclick="console()">Forward &gt;</button>\
+                       <button id="jmpLastInstr", type="button" onclick="console()">Last &gt;&gt;</button>\
                      </div>\
-                     <div id="rawUserInputDiv">\
-                       <span id="userInputPromptStr"/>\
-                       <input type="text" id="raw_input_textbox" size="30"/>\
-                       <button id="raw_input_submit_btn">Submit</button>\
-                     </div>\
-                     <div id="errorOutput"/>\
+                     <div id="select_exc"><br>\
+                     <h1>Select timer</h1>\
+                       <select id="option_exc">\
+                          <option value="1000">1 Sec</option>\
+                          <option value="2000">2 Sec</option>\
+                          <option value="4000">4 Sec</option>\
+                          <option value="5000">6 Sec</option>\
+                    </select> <button id="run" type="button" onclick="run(1)">Run</button>\
+                    <button id="genUrlShortenedBtn" type="button" onclick="run(0)">Stop</button>\
+                    <div>\
                    </div>';
 
     this.domRoot.append(navHTML);

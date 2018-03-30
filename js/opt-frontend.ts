@@ -53,6 +53,8 @@ const JAVA_BLANK_TEMPLATE = `public class YourClassNameHere {
 
 const CPP_BLANK_TEMPLATE = `int main() {
 
+  printf("Hello World");
+
   return 0;
 }`;
 
@@ -113,37 +115,19 @@ export class OptFrontend extends AbstractBaseFrontend {
     $(window).resize(this.redrawConnectors.bind(this));
 
     $('#genUrlBtn').bind('click', () => {
-      var myArgs = this.getAppState();
-      var urlStr = $.param.fragment(window.location.href, myArgs, 2); // 2 means 'override'
-      urlStr = sanitizeURL(urlStr);
-      $('#urlOutput').val(urlStr);
-    });
+        var editorVal = $.trim(this.pyInputGetValue());
+        var name = 'file';
+        var user = 'Anurag';
 
-    $('#genUrlShortenedBtn').bind('click', () => {
-      var myArgs = this.getAppState();
-      var urlStr = $.param.fragment(window.location.href, myArgs, 2); // 2 means 'override'
-      urlStr = sanitizeURL(urlStr);
-      // call goo.gl URL shortener
-      //
-      // to test this API from command-line, first disable the IP restriction on API credentials, then run:
-      // curl https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyCIjtNqfABbRilub1a3Ta7-qKF3bS9_p1M -H 'Content-Type: application/json' -d '{"longUrl": "http://www.google.com/"}'
-      $.ajax('https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyCIjtNqfABbRilub1a3Ta7-qKF3bS9_p1M',
-             {type: 'POST',
-             contentType: 'application/json',
-             data: JSON.stringify({longUrl: urlStr}), // encode as a string first! #tricky
-             success: function(dat) {
-               $("#urlOutputShortened").val(dat.id);
-             },
-             error: function() {
-               $("#urlOutputShortened").val("Error in URL shortener :(");
-             }
-             });
-    });
+        $.ajax({
+       	   type: "POST",
+       	   url: "includes/save.inc.php",
+       	   data: { code : editorVal, name : name ,user : user }
+       	}).done(function(msg){
+            alert(msg);
+          });
 
-    $("#instructionsPane").html(`Advanced instructions:
-      <a href="https://www.youtube.com/watch?v=80ztTXP90Vs&list=PLzV58Zm8FuBL2WxxZKGZ6j1dH8NKb_HYI&index=5" target="_blank">setting breakpoints</a> |
-      <a href="https://www.youtube.com/watch?v=Mxt9HZWgwAM&list=PLzV58Zm8FuBL2WxxZKGZ6j1dH8NKb_HYI&index=6" target="_blank">hiding variables</a> |
-      <a href="https://www.youtube.com/watch?v=JjGt95Te0wo&index=3&list=PLzV58Zm8FuBL2WxxZKGZ6j1dH8NKb_HYI" target="_blank">live programming</a>`);
+    });
 
     // first initialize options from HTML LocalStorage. very important
     // that this code runs FIRST so that options get overridden by query
@@ -263,7 +247,7 @@ export class OptFrontend extends AbstractBaseFrontend {
     // auto-grow height as fit
     this.pyInputAceEditor.setOptions({minLines: 18, maxLines: 1000});
 
-    $('#codeInputPane').css('width', '700px');
+    $('#codeInputPane').css('width', '1200px');
     $('#codeInputPane').css('height', height + 'px'); // VERY IMPORTANT so that it works on I.E., ugh!
 
     this.initDeltaObj();
@@ -297,10 +281,12 @@ export class OptFrontend extends AbstractBaseFrontend {
   }
 
   setAceMode() {
+
     var selectorVal = $('#pythonVersionSelector').val();
     var mod;
     var tabSize = 2;
     var editorVal = $.trim(this.pyInputGetValue());
+
 
     if (editorVal === JAVA_BLANK_TEMPLATE || editorVal === CPP_BLANK_TEMPLATE) {
       editorVal = '';
@@ -329,7 +315,6 @@ export class OptFrontend extends AbstractBaseFrontend {
       tabSize = 4; // PEP8 style standards
     }
     assert(mod);
-
     var s = this.pyInputAceEditor.getSession();
     s.setMode("ace/mode/" + mod);
     s.setTabSize(tabSize);

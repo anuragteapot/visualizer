@@ -43,10 +43,4 @@ export class OptFrontendCsc108h extends OptFrontendSharedSessions {
     return ret;
   }
 
-} // END Class OptFrontendCsc108h
-
-$(document).ready(function() {
-  $("#footer").append(footerHtml); // initialize all HTML before creating OptFrontend object
-  var optFrontend = new OptFrontendCsc108h();
-  optFrontend.setSurveyHTML();
-});
+} 

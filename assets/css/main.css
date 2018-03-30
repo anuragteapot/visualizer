@@ -23,7 +23,7 @@
 	}
 
 	body {
-		line-height: 2!important;
+		line-height: 2!important
 	}
 
 	ol, ul {
@@ -2989,12 +2989,12 @@
 /* editor  */
 	.ace-tm{
 		color:	rgba(0, 184, 150, 1)!important;
-		background-color:rgba(20, 35, 36, 1)!important;
+		background-color:#343642!important;
 	}
 
 	.ace-tm .ace_gutter{
 		color: rgba(154, 147, 147, 0.82)!important;
-		background-color:rgba(20, 35, 36, 1)!important;
+		background-color:#343642!important;
 	}
 
 	.ace-tm .ace_gutter-active-line{
@@ -3052,17 +3052,20 @@
 	}
 
 	#codeInputPane{
-		width: 1000px!important;
-		min-height: 500px!important;
+		width: 100%;
+		min-height: 600px;
 	}
 
 	#pyInputPane, #loadingPane{
-		max-width: 1000px!important;
+		max-width: 100%;
 	}
 
 	#executeBtn{
 		width: 100%!important;
 		padding: 0;
+		border: white!important;
+		color: white!important;
+		background-color: #1c1c1c!important;
 		margin: 30px 0;
 	}
 
@@ -3086,6 +3089,113 @@
 	#vcrControls{
 		font-size: 12px!important;
 	}
+
+#select_exc{
+	text-align: center;
+}
+	#option_exc{
+		width: 133px;
+    height: 34px;
+    text-align: center;
+	}
+
+	#progOutputs{
+		visibility: hidden;
+		position: absolute;
+	}
+
+	#header_input{
+		background-color: #4686a0;
+		color: rgba(255, 255, 255, 0.75);
+		background-image: url("images/overlay2.png"), url("images/overlay3.svg"), linear-gradient(45deg, #9dc66b 5%, #4fa49a 30%, #4361c2);
+		background-position: top left, center center, center center;
+		background-size: auto, cover, cover;
+		overflow: hidden;
+		position: relative;
+	}
+/* console css */
+	#console{
+		background-color: black;
+		position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: white;
+    text-align: left;
+		z-index: 100;
+	}
+
+	#output_ex{
+		background-color: white;
+		width: 100%;
+		height: 150px;
+		resize: none;
+		color: white;
+		font-size: 15px;
+		letter-spacing: 1px;
+		background-color: #1c1c1c;
+
+	}
+
+	#con_text{
+		color: white;
+	}
+
+	.right{
+		text-align: right;
+		display: inline-block;
+		position: absolute;
+		right: 50px;
+		top:0;
+	}
+
+	#close{
+		display: block;
+		color: white;
+		font-family: "Lato", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Sans-Serif;
+		cursor: pointer;
+	}
+
+	#save{
+		position: absolute;
+		top:20px;
+		left:50px;
+		color: white;
+		z-index: 10;
+	}
+
+	#genUrlBtn{
+		color: white!important;
+		background-color:#2f889a;
+		border-radius: 50px;
+	}
+
+	#logout{
+		position: absolute;
+		top:20px;
+		right:50px;
+		color: white;
+		z-index: 10;
+	}
+
+	#logout_btn{
+		color: white!important;
+		background-color:#2f889a;
+		border-radius: 50px;
+
+	}
+
+	#user{
+		position: absolute;
+		text-align: center;
+		top:10px;
+		left:15%;
+		color: white;
+		z-index: 10;
+		font-size: 30px;
+	}
+
+
 /* Footer */
 
 	#footer {

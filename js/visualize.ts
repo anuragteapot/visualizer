@@ -712,7 +712,7 @@ $(document).ready(function() {
       .append(cExamplesHtml)
       .append(cppExamplesHtml);
   }
-  $("#footer").append(footerHtml);
+  $("#save").append(footerHtml);
 
   // insert a toggle for examples after #exampleSnippets, then hide it
   $("#exampleSnippets").after('<a href="#" id="showExampleLink" style="font-size: 11pt;">Show example code and courses</a>');
@@ -724,7 +724,6 @@ $(document).ready(function() {
   $("#exampleSnippets").hide();
 
   var optFrontend = new OptFrontendWithTestcases(params);
-  optFrontend.setSurveyHTML();
 
   (window as any).optFrontend = optFrontend; // purposely leak to globals to ease debugging!!!
 

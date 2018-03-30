@@ -581,7 +581,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 */
 __webpack_require__(8);
 __webpack_require__(0);
-__webpack_require__(11); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR 
+__webpack_require__(11); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR
 __webpack_require__(9);
 __webpack_require__(15);
 __webpack_require__(10); // contains slight pgbovine modifications
@@ -875,12 +875,7 @@ var ExecutionVisualizer = /** @class */ (function () {
             }
             // add an extra label to link back to the main site, so that viewers
             // on the embedded page know that they're seeing an OPT visualization
-            base.append('<div style="font-size: 8pt; margin-bottom: 10px;"><a href="http://pythontutor.com" target="_blank" style="color: #3D58A2;">Python Tutor</a> by <a href="https://twitter.com/pgbovine" target="_blank" style="color: #3D58A2;">Philip Guo</a>. Support with a <a href="http://pgbovine.net/support.htm" target="_blank">small donation</a>.</div>');
             base.find('#codeFooterDocs').hide(); // cut out extraneous docs
-        }
-        else {
-            // also display credits:
-            base.append('<div style="font-size: 9pt; margin-top: 5px; margin-bottom: 10px;">Created by <a href="https://twitter.com/pgbovine" target="_blank">@pgbovine</a>. Support with a <a href="http://pgbovine.net/support.htm" target="_blank">small donation</a>.</div>');
         }
         // not enough room for these extra buttons ...
         if (this.params.codeDivWidth &&
@@ -1476,7 +1471,7 @@ var DataVisualizer = /** @class */ (function () {
         this.curTrace = this.owner.curTrace;
         this.domRoot = domRoot;
         this.domRootD3 = domRootD3;
-        var codeVizHTML = "\n      <div id=\"dataViz\">\n         <table id=\"stackHeapTable\">\n           <tr>\n             <td id=\"stack_td\">\n               <div id=\"globals_area\">\n                 <div id=\"stackHeader\">" + this.getRealLabel("Frames") + "</div>\n               </div>\n               <div id=\"stack\"></div>\n             </td>\n             <td id=\"heap_td\">\n               <div id=\"heap\">\n                 <div id=\"heapHeader\">" + this.getRealLabel("Objects") + "</div>\n               </div>\n             </td>\n           </tr>\n         </table>\n       </div>";
+        var codeVizHTML = "\n      <div id=\"dataViz\">\n         <table id=\"stackHeapTable\">\n           <tr>\n             <td id=\"stack_td\">\n               <div id=\"globals_area\">\n                 <div id=\"stackHeader\">Output " + this.getRealLabel("Frames") + "</div>\n               </div>\n               <div id=\"stack\"></div>\n             </td>\n           </tr>\n         </table>\n       </div>";
         this.domRoot.append(codeVizHTML);
         // create a persistent globals frame
         // (note that we need to keep #globals_area separate from #stack for d3 to work its magic)
@@ -2717,7 +2712,7 @@ var DataVisualizer = /** @class */ (function () {
                 var cdataId = myViz.generateHeapObjID('cdata_' + addr, stepNum);
                 if (isValidPtr) {
                     // for pointers, put cdataId in the header
-                    d3DomElement.append('<div id="' + cdataId + '" class="cdataHeader">' + leader + typeName + '</div>');
+                    //d3DomElement.append('<div id="' + cdataId + '" class="cdataHeader">' + leader + typeName + '</div>');
                     var ptrVal = obj[3];
                     // add a stub so that we can connect it with a connector later.
                     // IE needs this div to be NON-EMPTY in order to properly
@@ -2742,7 +2737,7 @@ var DataVisualizer = /** @class */ (function () {
                 else {
                     // for non-pointers, put cdataId on the element itself, so that
                     // pointers can point directly at the element, not the header
-                    d3DomElement.append('<div class="cdataHeader">' + leader + typeName + '</div>');
+                    //  d3DomElement.append('<div class="cdataHeader">' + leader + typeName + '</div>');
                     var rep = '';
                     if (typeof obj[3] === 'string') {
                         var literalStr = obj[3];
@@ -3201,7 +3196,7 @@ var ProgramOutputBox = /** @class */ (function () {
         this.owner = owner;
         this.domRoot = domRoot;
         var outputsHTML = '<div id="progOutputs">\
-         <div id="printOutputDocs">Print output (drag lower right corner to resize)</div>\n\
+         <div id="printOutputDocs">Print output</div>\n\
          <textarea id="pyStdout" cols="40" rows="5" wrap="off" readonly></textarea>\
        </div>';
         this.domRoot.append(outputsHTML);
@@ -3272,7 +3267,7 @@ var CodeDisplay = /** @class */ (function () {
          <div id="editCodeLinkDiv"><a id="editBtn">Edit this code</a>\
          </div>\
          <div id="legendDiv"/>\
-         <div id="codeFooterDocs">Click a line of code to set a breakpoint; use the Back and Forward buttons to jump there.</div>\
+         <div id="codeFooterDocs"></div>\
        </div>';
         this.domRoot.append(codeDisplayHTML);
         if (this.owner.params.embeddedMode) {
@@ -3342,7 +3337,7 @@ var CodeDisplay = /** @class */ (function () {
                     this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
                 }
                 else {
-                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)<br/><font color="#e93f34">EXPERIMENTAL!</font> <a href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md" target="_blank">known bugs/limitations</a>');
+                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
                 }
             }
             else if (lang === 'cpp') {
@@ -3350,7 +3345,7 @@ var CodeDisplay = /** @class */ (function () {
                     this.domRoot.find('#langDisplayDiv').html('C++ (gcc 4.8, C++11)');
                 }
                 else {
-                    this.domRoot.find('#langDisplayDiv').html('C++ (gcc 4.8, C++11)<br/><font color="#e93f34">EXPERIMENTAL!</font> <a href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md" target="_blank">known bugs/limitations</a>');
+                    this.domRoot.find('#langDisplayDiv').html('C++ (gcc 4.8, C++11)');
                 }
             }
             else {
@@ -3605,18 +3600,22 @@ var NavigationController = /** @class */ (function () {
                      <div id="executionSlider"/>\
                      <div id="executionSliderFooter"/>\
                      <div id="vcrControls">\
-                       <button id="jmpFirstInstr", type="button">&lt;&lt; First</button>\
-                       <button id="jmpStepBack", type="button">&lt; Back</button>\
-                       <span id="curInstr">Step ? of ?</span>\
-                       <button id="jmpStepFwd", type="button">Forward &gt;</button>\
-                       <button id="jmpLastInstr", type="button">Last &gt;&gt;</button>\
+                     <span id="curInstr">Step ? of ?</span><br>\
+                       <button id="jmpFirstInstr", type="button" onclick="console()">&lt;&lt; First</button>\
+                       <button id="jmpStepBack", type="button" onclick="console()">&lt; Back</button>\
+                       <button id="jmpStepFwd", type="button" onclick="console()">Forward &gt;</button>\
+                       <button id="jmpLastInstr", type="button" onclick="console()">Last &gt;&gt;</button>\
                      </div>\
-                     <div id="rawUserInputDiv">\
-                       <span id="userInputPromptStr"/>\
-                       <input type="text" id="raw_input_textbox" size="30"/>\
-                       <button id="raw_input_submit_btn">Submit</button>\
-                     </div>\
-                     <div id="errorOutput"/>\
+                     <div id="select_exc"><br>\
+                     <h1>Select timer</h1>\
+                       <select id="option_exc">\
+                          <option value="1000">1 Sec</option>\
+                          <option value="2000">2 Sec</option>\
+                          <option value="4000">4 Sec</option>\
+                          <option value="5000">6 Sec</option>\
+                    </select> <button id="run" type="button" onclick="run(1)">Run</button>\
+                    <button id="genUrlShortenedBtn" type="button" onclick="run(0)">Stop</button>\
+                    <div>\
                    </div>';
         this.domRoot.append(navHTML);
         this.domRoot.find("#jmpFirstInstr").click(function () { _this.owner.renderStep(0); });

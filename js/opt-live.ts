@@ -673,9 +673,3 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
   }
 
 } // END class OptLiveFrontend
-
-
-$(document).ready(function() {
-  optLiveFrontend = new OptLiveFrontend({});
-  optLiveFrontend.setSurveyHTML();
-});
