@@ -15,7 +15,7 @@ if(isset($_POST['email']) && isset($_POST['password']))
 
        if(empty($username) || empty($password))
        {
-              $error="Input field is empty.";
+              $error="Required Inputs";
               echo $error;
               exit();
         }
@@ -39,7 +39,7 @@ if(isset($_POST['email']) && isset($_POST['password']))
 
                             if($password!=$row['password'])
                               {
-                                    $error="Username and password do not match or you do not have an account yet.";
+                                    $error="Username and password do not match or you do not have an account yet";
                                     echo $error;
 
                                     exit();
@@ -54,14 +54,16 @@ if(isset($_POST['email']) && isset($_POST['password']))
                                      $_SESSION['u_name']=$row['name'];
                                      $_SESSION['u_email']=$row['email'];
 
-                                     require 'create_dir.inc.php';
+                                    // require 'create_dir.inc.php';
+                                    $success = "1";
+                                    echo $success;
                                      exit();
                                   }
 
                               }
                               else
                                {
-                                    $error="Your account is not activated. Please check your email.";
+                                    $error="Your account is not activated";
                                     echo $error;
 
                                     exit();

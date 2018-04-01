@@ -3614,7 +3614,7 @@ var NavigationController = /** @class */ (function () {
                           <option value="4000">4 Sec</option>\
                           <option value="5000">6 Sec</option>\
                     </select> <button id="run" type="button" onclick="run(1)">Run</button>\
-                    <button id="genUrlShortenedBtn" type="button" onclick="run(0)">Stop</button>\
+                    <button id="stop" type="button" onclick="run(0)">Stop</button>\
                     <div>\
                    </div>';
         this.domRoot.append(navHTML);

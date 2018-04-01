@@ -3646,7 +3646,7 @@ var NavigationController = /** @class */ (function () {
                           <option value="4000">4 Sec</option>\
                           <option value="5000">6 Sec</option>\
                     </select> <button id="run" type="button" onclick="run(1)">Run</button>\
-                    <button id="genUrlShortenedBtn" type="button" onclick="run(0)">Stop</button>\
+                    <button id="stop" type="button" onclick="run(0)">Stop</button>\
                     <div>\
                    </div>';
         this.domRoot.append(navHTML);
@@ -3916,6 +3916,15 @@ var AbstractBaseFrontend = /** @class */ (function () {
             // (Webfaction) seems to let scripts execute only if permissions are
             // something like:
             // -rwxr-xr-x 1 pgbovine pgbovine 2.5K Jul  5 22:46 web_exec_py2.py*
+            // (most notably, only the owner of the file should have write
+            //  permissions)
+            '2': 'web_exec_py2.py',
+            '3': 'web_exec_py3.py',
+            // empty dummy scripts just to do logging on Apache server
+            'js': 'web_exec_js.py',
+            'ts': 'web_exec_ts.py',
+            'java': 'web_exec_java.py',
+            'ruby': 'web_exec_ruby.py',
             'c': 'web_exec_c.py',
             'cpp': 'web_exec_cpp.py',
         };
@@ -3929,12 +3938,20 @@ var AbstractBaseFrontend = /** @class */ (function () {
         this.langSettingToJsonpEndpoint = {
             '2': null,
             '3': null,
+            'js': this.serverRoot + 'exec_js_jsonp',
+            'ts': this.serverRoot + 'exec_ts_jsonp',
+            'java': this.serverRoot + 'exec_java_jsonp',
+            'ruby': this.serverRoot + 'exec_ruby_jsonp',
             'c': this.serverRoot + 'exec_c_jsonp',
             'cpp': this.serverRoot + 'exec_cpp_jsonp',
         };
         this.langSettingToJsonpEndpointBackup = {
             '2': null,
             '3': null,
+            'js': this.backupHttpServerRoot + 'exec_js_jsonp',
+            'ts': this.backupHttpServerRoot + 'exec_ts_jsonp',
+            'java': this.backupHttpServerRoot + 'exec_java_jsonp',
+            'ruby': this.backupHttpServerRoot + 'exec_ruby_jsonp',
             'c': this.backupHttpServerRoot + 'exec_c_jsonp',
             'cpp': this.backupHttpServerRoot + 'exec_cpp_jsonp',
         };
@@ -4027,8 +4044,8 @@ var AbstractBaseFrontend = /** @class */ (function () {
     AbstractBaseFrontend.prototype.getAppState = function () { return {}; }; // NOP -- subclasses need to override
     AbstractBaseFrontend.prototype.setFronendError = function (lines, ignoreLog) {
         if (ignoreLog === void 0) { ignoreLog = false; }
-        $("#frontendErrorOutput").html(lines.map(pytutor_1.htmlspecialchars).join('<br/>') +
-            (ignoreLog ? '' : '<p/>Here is a list of <a target="_blank" href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md">UNSUPPORTED FEATURES</a>'));
+        $(".frontendErrorOutput").html(lines.map(pytutor_1.htmlspecialchars).join('<br/>') +
+            (ignoreLog ? '' : ''));
         // log it to the server as well (unless ignoreLog is on)
         if (!ignoreLog) {
             var errorStr = lines.join();
@@ -4048,7 +4065,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
         }
     };
     AbstractBaseFrontend.prototype.clearFrontendError = function () {
-        $("#frontendErrorOutput").html('');
+        $(".frontendErrorOutput").html('');
     };
     // parsing the URL query string hash
     AbstractBaseFrontend.prototype.getQueryStringOptions = function () {
@@ -4113,14 +4130,12 @@ var AbstractBaseFrontend = /** @class */ (function () {
     };
     AbstractBaseFrontend.prototype.startExecutingCode = function (startingInstruction) {
         if (startingInstruction === void 0) { startingInstruction = 0; }
-        $('#executeBtn').html("Please wait ... executing");
+        $('#executeBtn').html("Please wait ... Your code is Executing");
         $('#executeBtn').attr('disabled', true);
-        //console.log('start');
         this.isExecutingCode = true;
     };
     AbstractBaseFrontend.prototype.doneExecutingCode = function () {
         $('#executeBtn').html("Visualize Execution");
-        //console.log('close');
         $('#executeBtn').attr('disabled', false);
         this.isExecutingCode = false;
     };
@@ -4322,9 +4337,77 @@ var AbstractBaseFrontend = /** @class */ (function () {
                 diffs_json: deltaObjStringified }, callbackWrapper, "json");
         }
     };
+    AbstractBaseFrontend.prototype.setSurveyHTML = function () {
+        // use ${this.userUUID} within the string ...
+        var survey_v14 = "\n    <p style=\"font-size: 9pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;\">\n\n    Help improve this tool by completing a <a style=\"font-size: 10pt; font-weight: bold;\" href=\"https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=" + this.userUUID + "\" target=\"_blank\">short user survey</a>\n    <br/>\n    Keep this tool free by making a <a style=\"font-size: 10pt; font-weight: bold;\" href=\"http://pgbovine.net/support.htm\" target=\"_blank\">small donation</a> (PayPal, Patreon, credit/debit card)\n    </p>";
+        $('#surveyPane').html(survey_v14);
+    };
     return AbstractBaseFrontend;
 }()); // END class AbstractBaseFrontend
 exports.AbstractBaseFrontend = AbstractBaseFrontend;
+/* For survey questions. Versions of survey wording:
+
+[see ../../v3/js/opt-frontend-common.js for older versions of survey wording - v1 to v7]
+
+v8: (deployed on 2016-06-20) - like v7 except emphasize the main usage survey more, and have the over-60 survey as auxiliary
+const survey_v8 = '\n\
+<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
+<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1-aKilu0PECHZVRSIXHv8vJpEuKUO9uG3MrH864uX56U/viewform" target="_blank">filling out this user survey</a>.</span>\n\
+<br/>\n\
+<span style="font-size: 9pt;">If you are <b>at least 60 years old</b>, please also fill out <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank">our survey about learning programming</a>.</span>\n\
+</p>'
+
+v9: (deployed on 2016-08-14, taken down 2016-12-05) - only put up the "older adults" survey except generalize it to ALL ages, take down the OPT usage survey for now
+const survey_v9 = '\n\
+<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
+<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank"><b>filling out this user survey</b></a>.</span>\n\
+</p>'
+
+v10: (deployed on 2016-12-05) - survey of how native languages affects learning programming
+     (taken down on 2017-07-28)
+[see survey_v10 variable above]
+
+    // use ${this.userUUID} within the string ...
+    var survey_v10 = '\n\
+    <p style="font-size: 11pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
+    <span><span style="color: #e93f34;">Support our research and keep this tool free</span> by filling out this <a href="https://docs.google.com/forms/d/e/1FAIpQLSe48NsBZPvu1hrTBwc8-aSic7nPSxpsxFqpUxV5AN4LwnyJWg/viewform?entry.956368502=';
+    survey_v10 += this.userUUID;
+    survey_v10 += '" target="_blank">survey on how your native spoken language affects how you learn programming</a>.</span></p>';
+
+    $('#surveyPane').html(survey_v10);
+
+v11: labinthewild python debugging experiment (deployed on 2017-07-28, taken down on 2017-09-12)
+    var survey_v11 = `<p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">
+                        <span>
+                          <span style="color: #e93f34;">Support our research and practice Python</span>
+                          by trying our new
+                          <a target="_blank" href="http://www.labinthewild.org/studies/python_tutor/">debugging skill test</a>!`;
+
+v12: simplified demographic survey which is a simplified hybrid of the v8 general usage survey and the v10 native language survey (deployed on 2017-09-12)
+
+    // use ${this.userUUID} within the string ...
+    var survey_v12 = '\n\
+    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
+    <span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
+    survey_v12 += this.userUUID;
+    survey_v12 += '" target="_blank"><b>filling out this short user survey</b></a>.</span></p>';
+
+v13: same as v12 except with slightly different wording, and adding a
+call for donations (deployed on 2017-12-27)
+
+    // use ${this.userUUID} within the string ...
+    var survey_v13 = '\n\
+    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
+    <div style="margin-bottom: 12px;">Keep this tool free for everyone by <a href="http://pgbovine.net/support.htm" target="_blank"><b>making a small donation</b></a> <span style="font-size: 8pt;">(PayPal, Patreon, credit/debit card)</span></div>\
+    <span>Support our research by completing a <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
+    survey_v13 += this.userUUID;
+    survey_v13 += '" target="_blank"><b>short user survey</b></a></span></p>';
+
+
+v14: very similar to v13 (deployed on 2018-03-11)
+[see the survey_v14 variable]
+
+*/
 // misc utilities:
 // From http://stackoverflow.com/a/8809472
 function generateUUID() {
@@ -24458,7 +24541,9 @@ var OptFrontend = /** @class */ (function (_super) {
                 url: "includes/save.inc.php",
                 data: { code: editorVal, name: name, user: user }
             }).done(function (msg) {
-                alert(msg);
+                $('#snackbar').text("Saved");
+                $('#snackbar').addClass("show");
+                setTimeout(function () { $('#snackbar').removeClass("show"); }, 3000);
             });
         });
         // first initialize options from HTML LocalStorage. very important
@@ -24491,6 +24576,10 @@ var OptFrontend = /** @class */ (function (_super) {
         // still a bit flaky ... TODO: investigate :(
         $(window).on('beforeunload', function () {
             _this.submitUpdateHistory('beforeunload');
+            //window.onbeforeunload = function(event)
+            //  {
+            // return confirm("Confirm refresh");
+            //  };
             // don't return anything, or a modal dialog box might pop up
         });
         // just do this as well, even though it might be hella redundant
@@ -25509,10 +25598,10 @@ var OptLiveFrontend = /** @class */ (function (_super) {
             curEntry.event === 'uncaught_exception') {
             pytutor_1.assert(curEntry.exception_msg);
             if (curEntry.exception_msg == "Unknown error") {
-                $("#frontendErrorOutput").html('Unknown error: Please email a bug report to philip@pgbovine.net');
+                $(".frontendErrorOutput").html('Unknown error: Please email a bug report to philip@pgbovine.net');
             }
             else {
-                $("#frontendErrorOutput").html(pytutor_1.htmlspecialchars(curEntry.exception_msg));
+                $(".frontendErrorOutput").html(pytutor_1.htmlspecialchars(curEntry.exception_msg));
             }
             if (myVisualizer.curLineNumber) {
                 var Range = ace.require('ace/range').Range;
@@ -25521,10 +25610,10 @@ var OptLiveFrontend = /** @class */ (function (_super) {
             }
         }
         else if (myVisualizer.instrLimitReached) {
-            $("#frontendErrorOutput").html(pytutor_1.htmlspecialchars(myVisualizer.instrLimitReachedWarningMsg));
+            $(".frontendErrorOutput").html(pytutor_1.htmlspecialchars(myVisualizer.instrLimitReachedWarningMsg));
         }
         else {
-            $("#frontendErrorOutput").html(''); // clear it
+            $(".frontendErrorOutput").html(''); // clear it
         }
         this.removeAllGutterDecorations();
         // special case if both arrows overlap
@@ -25892,6 +25981,10 @@ var OptLiveFrontend = /** @class */ (function (_super) {
     return OptLiveFrontend;
 }(opt_shared_sessions_1.OptFrontendSharedSessions)); // END class OptLiveFrontend
 exports.OptLiveFrontend = OptLiveFrontend;
+$(document).ready(function () {
+    optLiveFrontend = new OptLiveFrontend({});
+    optLiveFrontend.setSurveyHTML();
+});
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 

@@ -62,7 +62,16 @@ export abstract class AbstractBaseFrontend {
     // (Webfaction) seems to let scripts execute only if permissions are
     // something like:
     // -rwxr-xr-x 1 pgbovine pgbovine 2.5K Jul  5 22:46 web_exec_py2.py*
+    // (most notably, only the owner of the file should have write
+    //  permissions)
+    '2': 'web_exec_py2.py',
+    '3': 'web_exec_py3.py',
 
+    // empty dummy scripts just to do logging on Apache server
+    'js':   'web_exec_js.py',
+    'ts':   'web_exec_ts.py',
+    'java': 'web_exec_java.py',
+    'ruby': 'web_exec_ruby.py',
     'c':   'web_exec_c.py',
     'cpp': 'web_exec_cpp.py',
   };
@@ -79,6 +88,10 @@ export abstract class AbstractBaseFrontend {
   langSettingToJsonpEndpoint = {
     '2':    null,
     '3':    null,
+    'js':   this.serverRoot + 'exec_js_jsonp',
+    'ts':   this.serverRoot + 'exec_ts_jsonp',
+    'java': this.serverRoot + 'exec_java_jsonp',
+    'ruby': this.serverRoot + 'exec_ruby_jsonp',
     'c':    this.serverRoot + 'exec_c_jsonp',
     'cpp':  this.serverRoot + 'exec_cpp_jsonp',
   };
@@ -86,6 +99,10 @@ export abstract class AbstractBaseFrontend {
   langSettingToJsonpEndpointBackup = {
     '2':    null,
     '3':    null,
+    'js':   this.backupHttpServerRoot + 'exec_js_jsonp',
+    'ts':   this.backupHttpServerRoot + 'exec_ts_jsonp',
+    'java': this.backupHttpServerRoot + 'exec_java_jsonp',
+    'ruby': this.backupHttpServerRoot + 'exec_ruby_jsonp',
     'c':    this.backupHttpServerRoot + 'exec_c_jsonp',
     'cpp':  this.backupHttpServerRoot + 'exec_cpp_jsonp',
   };
@@ -190,8 +207,8 @@ export abstract class AbstractBaseFrontend {
   getAppState() {return {};} // NOP -- subclasses need to override
 
   setFronendError(lines, ignoreLog=false) {
-    $("#frontendErrorOutput").html(lines.map(htmlspecialchars).join('<br/>') +
-                                   (ignoreLog ? '' : '<p/>Here is a list of <a target="_blank" href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md">UNSUPPORTED FEATURES</a>'));
+    $(".frontendErrorOutput").html(lines.map(htmlspecialchars).join('<br/>') +
+                                   (ignoreLog ? '' : ''));
 
     // log it to the server as well (unless ignoreLog is on)
     if (!ignoreLog) {
@@ -214,10 +231,8 @@ export abstract class AbstractBaseFrontend {
     }
   }
 
-
-
   clearFrontendError() {
-    $("#frontendErrorOutput").html('');
+    $(".frontendErrorOutput").html('');
   }
 
   // parsing the URL query string hash
@@ -290,15 +305,13 @@ export abstract class AbstractBaseFrontend {
   }
 
   startExecutingCode(startingInstruction=0) {
-    $('#executeBtn').html("Please wait ... executing");
+    $('#executeBtn').html("Please wait ... Your code is Executing");
     $('#executeBtn').attr('disabled', true);
-    //console.log('start');
     this.isExecutingCode = true;
   }
 
   doneExecutingCode() {
     $('#executeBtn').html("Visualize Execution");
-    //console.log('close');
     $('#executeBtn').attr('disabled', false);
     this.isExecutingCode = false;
   }
@@ -530,9 +543,83 @@ export abstract class AbstractBaseFrontend {
       }
   }
 
+  setSurveyHTML() {
+    // use ${this.userUUID} within the string ...
+    var survey_v14 = `
+    <p style="font-size: 9pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">
 
+    Help improve this tool by completing a <a style="font-size: 10pt; font-weight: bold;" href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=${this.userUUID}" target="_blank">short user survey</a>
+    <br/>
+    Keep this tool free by making a <a style="font-size: 10pt; font-weight: bold;" href="http://pgbovine.net/support.htm" target="_blank">small donation</a> (PayPal, Patreon, credit/debit card)
+    </p>`;
+    $('#surveyPane').html(survey_v14);
+  }
 } // END class AbstractBaseFrontend
 
+
+/* For survey questions. Versions of survey wording:
+
+[see ../../v3/js/opt-frontend-common.js for older versions of survey wording - v1 to v7]
+
+v8: (deployed on 2016-06-20) - like v7 except emphasize the main usage survey more, and have the over-60 survey as auxiliary
+const survey_v8 = '\n\
+<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
+<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1-aKilu0PECHZVRSIXHv8vJpEuKUO9uG3MrH864uX56U/viewform" target="_blank">filling out this user survey</a>.</span>\n\
+<br/>\n\
+<span style="font-size: 9pt;">If you are <b>at least 60 years old</b>, please also fill out <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank">our survey about learning programming</a>.</span>\n\
+</p>'
+
+v9: (deployed on 2016-08-14, taken down 2016-12-05) - only put up the "older adults" survey except generalize it to ALL ages, take down the OPT usage survey for now
+const survey_v9 = '\n\
+<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
+<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank"><b>filling out this user survey</b></a>.</span>\n\
+</p>'
+
+v10: (deployed on 2016-12-05) - survey of how native languages affects learning programming
+     (taken down on 2017-07-28)
+[see survey_v10 variable above]
+
+    // use ${this.userUUID} within the string ...
+    var survey_v10 = '\n\
+    <p style="font-size: 11pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
+    <span><span style="color: #e93f34;">Support our research and keep this tool free</span> by filling out this <a href="https://docs.google.com/forms/d/e/1FAIpQLSe48NsBZPvu1hrTBwc8-aSic7nPSxpsxFqpUxV5AN4LwnyJWg/viewform?entry.956368502=';
+    survey_v10 += this.userUUID;
+    survey_v10 += '" target="_blank">survey on how your native spoken language affects how you learn programming</a>.</span></p>';
+
+    $('#surveyPane').html(survey_v10);
+
+v11: labinthewild python debugging experiment (deployed on 2017-07-28, taken down on 2017-09-12)
+    var survey_v11 = `<p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">
+                        <span>
+                          <span style="color: #e93f34;">Support our research and practice Python</span>
+                          by trying our new
+                          <a target="_blank" href="http://www.labinthewild.org/studies/python_tutor/">debugging skill test</a>!`;
+
+v12: simplified demographic survey which is a simplified hybrid of the v8 general usage survey and the v10 native language survey (deployed on 2017-09-12)
+
+    // use ${this.userUUID} within the string ...
+    var survey_v12 = '\n\
+    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
+    <span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
+    survey_v12 += this.userUUID;
+    survey_v12 += '" target="_blank"><b>filling out this short user survey</b></a>.</span></p>';
+
+v13: same as v12 except with slightly different wording, and adding a
+call for donations (deployed on 2017-12-27)
+
+    // use ${this.userUUID} within the string ...
+    var survey_v13 = '\n\
+    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
+    <div style="margin-bottom: 12px;">Keep this tool free for everyone by <a href="http://pgbovine.net/support.htm" target="_blank"><b>making a small donation</b></a> <span style="font-size: 8pt;">(PayPal, Patreon, credit/debit card)</span></div>\
+    <span>Support our research by completing a <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
+    survey_v13 += this.userUUID;
+    survey_v13 += '" target="_blank"><b>short user survey</b></a></span></p>';
+
+
+v14: very similar to v13 (deployed on 2018-03-11)
+[see the survey_v14 variable]
+
+*/
 
 // misc utilities:
 

@@ -21,7 +21,9 @@ $(document).ready(function(){
 
             if(status=="success")
             {
-                alert(data);
+              $('#snackbar').text(data);
+              $('#snackbar').addClass("show");
+              setTimeout(function(){ $('#snackbar').removeClass("show");}, 3000);
             }
 
           });
@@ -47,7 +49,14 @@ $(document).ready(function(){
 
             if(status=="success")
             {
-                window.location = "http://localhost/project/vis/OnlinePythonTutor-master/v5-unity/";
+                if(data!=1)
+                {
+                  $('#snackbar').text(data);
+                  $('#snackbar').addClass("show");
+                  setTimeout(function(){ $('#snackbar').removeClass("show");}, 3000);
+                } else {
+                  window.location = "http://localhost/project/vis/OnlinePythonTutor-master/v5-unity/";
+                }
             }
 
           });
@@ -72,7 +81,9 @@ $(document).ready(function(){
 
             if(status=="success")
             {
-                alert(data);
+              $('#snackbar').text(data);
+              $('#snackbar').addClass("show");
+              setTimeout(function(){ $('#snackbar').removeClass("show");}, 3000);
             }
 
           });
@@ -94,6 +105,7 @@ $(document).ready(function(){
 
             if(status=="success")
             {
+
                 window.location = "http://localhost/project/vis/OnlinePythonTutor-master/v5-unity/";
             }
 
@@ -103,24 +115,13 @@ $(document).ready(function(){
 
 
 $(document).ready(function(){
-
   $("a").on('click', function(event) {
-
-
     if (this.hash !== "") {
-
-      event.preventDefault();
-
-
+      event.preventDefault()
       var hash = this.hash;
-
-
-
       $('html, body').animate({
         scrollTop: $(hash).offset().top
       }, 800, function(){
-
-
         window.location.hash = hash;
       });
     }

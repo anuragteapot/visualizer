@@ -59,13 +59,13 @@ if(isset($_SESSION['u_username'])) {
 				<div id="cd-login"> <!-- log in form -->
 					<form class="cd-form">
 						<p class="fieldset">
-							<label class="image-replace cd-email" for="signin-email">E-mail</label>
-							<input class="full-width has-padding has-border" id="signin-email" type="email" placeholder="E-mail">
+							<label class="image-replace cd-email" for="signin-email">E-mail or Username</label>
+							<input class="full-width has-padding has-border" id="signin-email" type="email" placeholder="E-mail or Username">
 						</p>
 
 						<p class="fieldset">
 							<label class="image-replace cd-password" for="signin-password">Password</label>
-							<input class="full-width has-padding has-border" id="signin-password" type="text"  placeholder="Password">
+							<input class="full-width has-padding has-border" id="signin-password" type="password"  placeholder="Password">
 							<a href="javascript:void(0)" class="hide-password">Hide</a>
 						</p>
 
@@ -102,7 +102,7 @@ if(isset($_SESSION['u_username'])) {
 
 						<p class="fieldset">
 							<label class="image-replace cd-password" for="signup-password">Password</label>
-							<input class="full-width has-padding has-border" id="signup-password" type="text"  placeholder="Password">
+							<input class="full-width has-padding has-border" id="signup-password" type="password"  placeholder="Password">
 							<a href="javascript:void(0)" class="hide-password">Hide</a>
 						</p>
 
@@ -265,7 +265,11 @@ if(isset($_SESSION['u_username'])) {
 					</header>
 					<p>Know more about this software</p>
 					<ul class="actions uniform">
-
+						<?php
+						if(!isset($_SESSION['u_username'])){
+									echo '<li><a href="#in" class="button special">Sign Up</a></li>';
+								}
+						?>
 						<li><a href="#" class="button">Learn More</a></li>
 					</ul>
 				</div>
@@ -297,12 +301,13 @@ if(isset($_SESSION['u_username'])) {
 						<a id="close">Toggle</>
 					</div>
 
-					<textarea id="output_ex">
+					<textarea id="output_ex" class="frontendErrorOutput">
 					</textarea>
 
 					</div>
 			</section>
 
+			<div id="snackbar"></div>
 
 		<!-- Scripts -->
 			<script src="assets/js/jquery.min.js"></script>

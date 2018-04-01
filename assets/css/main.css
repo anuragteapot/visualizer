@@ -3112,6 +3112,7 @@
 		background-size: auto, cover, cover;
 		overflow: hidden;
 		position: relative;
+		padding-bottom: 150px; 
 	}
 /* console css */
 	#console{
@@ -3134,6 +3135,7 @@
 		font-size: 15px;
 		letter-spacing: 1px;
 		background-color: #1c1c1c;
+
 
 	}
 
@@ -3194,6 +3196,50 @@
 		z-index: 10;
 		font-size: 30px;
 	}
+
+/*snakbar*/
+	#snackbar {
+	    visibility: hidden;
+	    min-width: 250px;
+	    margin-left: -125px;
+	    background-color: #009999;
+	    color: white;
+	    text-align: center;
+	    border-radius: 2px;
+	    padding: 10px;
+	    position: fixed;
+	    z-index: 100;
+	    left: 50%;
+	    bottom: 50px;
+	    font-size: 20px;
+	}
+
+	#snackbar.show {
+	    visibility: visible;
+	    -webkit-animation: fadein 0.7s, fadeout 0.7s 2.7s;
+	    animation: fadein 0.7s, fadeout 0.7s 2.7s;
+	}
+
+	@-webkit-keyframes fadein {
+	    from {bottom: 0; opacity: 0;}
+	    to {bottom: 50px; opacity: 1;}
+	}
+
+	@keyframes fadein {
+	    from {bottom: 0; opacity: 0;}
+	    to {bottom: 50px; opacity: 1;}
+	}
+
+	@-webkit-keyframes fadeout {
+	    from {bottom: 50px; opacity: 1;}
+	    to {bottom: 0; opacity: 0;}
+	}
+
+	@keyframes fadeout {
+	    from {bottom: 50px; opacity: 1;}
+	    to {bottom: 0; opacity: 0;}
+	}
+
 
 
 /* Footer */

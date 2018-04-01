@@ -124,7 +124,9 @@ export class OptFrontend extends AbstractBaseFrontend {
        	   url: "includes/save.inc.php",
        	   data: { code : editorVal, name : name ,user : user }
        	}).done(function(msg){
-            alert(msg);
+            $('#snackbar').text("Saved");
+            $('#snackbar').addClass("show");
+            setTimeout(function(){ $('#snackbar').removeClass("show");}, 3000);
           });
 
     });
@@ -161,6 +163,10 @@ export class OptFrontend extends AbstractBaseFrontend {
     // still a bit flaky ... TODO: investigate :(
     $(window).on('beforeunload', () => {
       this.submitUpdateHistory('beforeunload');
+      //window.onbeforeunload = function(event)
+    //  {
+      // return confirm("Confirm refresh");
+      //  };
       // don't return anything, or a modal dialog box might pop up
     });
 

@@ -1,4 +1,4 @@
-/* -------------------------------- 
+/* --------------------------------
 
 Primary style
 
@@ -39,9 +39,9 @@ input::-ms-clear, textarea::-ms-clear {
   display: none;
 }
 
-/* -------------------------------- 
+/* --------------------------------
 
-Main components 
+Main components
 
 -------------------------------- */
 header[role=banner] {
@@ -170,9 +170,9 @@ header[role=banner]::after {
   }
 }
 
-/* -------------------------------- 
+/* --------------------------------
 
-xsigin/signup popup 
+xsigin/signup popup
 
 -------------------------------- */
 .cd-user-modal {
@@ -344,7 +344,7 @@ xsigin/signup popup
   padding-right: 65px;
 }
 .cd-form input[type=submit] {
-  padding: 16px 0;
+  padding: 1px 0;
   cursor: pointer;
   background: #2f889a;
   color: #FFF;
@@ -434,7 +434,7 @@ xsigin/signup popup
     padding: 16px 20px 16px 50px;
   }
   .cd-form input[type=submit] {
-    padding: 16px 0;
+    padding: 1px 0;
   }
 }
 

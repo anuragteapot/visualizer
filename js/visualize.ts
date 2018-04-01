@@ -724,6 +724,7 @@ $(document).ready(function() {
   $("#exampleSnippets").hide();
 
   var optFrontend = new OptFrontendWithTestcases(params);
+  optFrontend.setSurveyHTML();
 
   (window as any).optFrontend = optFrontend; // purposely leak to globals to ease debugging!!!
 

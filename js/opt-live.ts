@@ -237,9 +237,9 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
         curEntry.event === 'uncaught_exception') {
       assert(curEntry.exception_msg);
       if (curEntry.exception_msg == "Unknown error") {
-        $("#frontendErrorOutput").html('Unknown error: Please email a bug report to philip@pgbovine.net');
+        $(".frontendErrorOutput").html('Unknown error: Please email a bug report to philip@pgbovine.net');
       } else {
-        $("#frontendErrorOutput").html(htmlspecialchars(curEntry.exception_msg));
+        $(".frontendErrorOutput").html(htmlspecialchars(curEntry.exception_msg));
       }
 
       if (myVisualizer.curLineNumber) {
@@ -249,9 +249,9 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
         this.allMarkerIds.push(markerId);
       }
     } else if (myVisualizer.instrLimitReached) {
-      $("#frontendErrorOutput").html(htmlspecialchars(myVisualizer.instrLimitReachedWarningMsg));
+      $(".frontendErrorOutput").html(htmlspecialchars(myVisualizer.instrLimitReachedWarningMsg));
     } else {
-      $("#frontendErrorOutput").html(''); // clear it
+      $(".frontendErrorOutput").html(''); // clear it
     }
 
     this.removeAllGutterDecorations();
@@ -673,3 +673,9 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
   }
 
 } // END class OptLiveFrontend
+
+
+$(document).ready(function() {
+  optLiveFrontend = new OptLiveFrontend({});
+  optLiveFrontend.setSurveyHTML();
+});
