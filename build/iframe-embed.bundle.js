@@ -3274,7 +3274,7 @@ var CodeDisplay = /** @class */ (function () {
             this.domRoot.find('#editCodeLinkDiv').css('font-size', '10pt');
         }
         this.domRoot.find('#legendDiv')
-            .append('<svg id="prevLegendArrowSVG"/> line that has just executed')
+            .append('<svg id="prevLegendArrowSVG"/>  current line executes')
             .append('<p style="margin-top: 4px"><svg id="curLegendArrowSVG"/> next line to execute</p>');
         this.domRootD3.select('svg#prevLegendArrowSVG')
             .append('polygon')
@@ -3994,8 +3994,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
             else {
                 _this.setFronendError(["Server error! Your code might have an INFINITE LOOP or be running for too long.",
                     "The server may also be OVERLOADED. Or you're behind a FIREWALL that blocks access.",
-                    "Try again later, or report a bug to philip@pgbovine.net by clicking the 'Generate",
-                    "shortened link' button at the bottom of this page and including a URL in your email."]);
+                    "Try again later, or report a bug to philip@pgbovine.net",]);
             }
             _this.doneExecutingCode();
         });
@@ -4012,8 +4011,8 @@ var AbstractBaseFrontend = /** @class */ (function () {
     AbstractBaseFrontend.prototype.getAppState = function () { return {}; }; // NOP -- subclasses need to override
     AbstractBaseFrontend.prototype.setFronendError = function (lines, ignoreLog) {
         if (ignoreLog === void 0) { ignoreLog = false; }
-        $(".frontendErrorOutput").html(lines.map(pytutor_1.htmlspecialchars).join('<br/>') +
-            (ignoreLog ? '' : ''));
+        $("#frontendErrorOutput").html(lines.map(pytutor_1.htmlspecialchars).join('<br/>') +
+            (ignoreLog ? '' : '<p/>Here is a list of <a target="_blank" href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md">UNSUPPORTED FEATURES</a>'));
         // log it to the server as well (unless ignoreLog is on)
         if (!ignoreLog) {
             var errorStr = lines.join();
@@ -4033,7 +4032,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
         }
     };
     AbstractBaseFrontend.prototype.clearFrontendError = function () {
-        $(".frontendErrorOutput").html('');
+        $("#frontendErrorOutput").html('');
     };
     // parsing the URL query string hash
     AbstractBaseFrontend.prototype.getQueryStringOptions = function () {
@@ -4127,8 +4126,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
                 else {
                     _this.setFronendError(["Unknown error: The server may be OVERLOADED right now; try again later.",
                         "Your code may also contain UNSUPPORTED FEATURES that this tool cannot handle.",
-                        "Report a bug to philip@pgbovine.net by clicking the 'Generate shortened link'",
-                        "button at the bottom and including a URL in your email. [#NullTrace]"]);
+                        "Report a bug to philip@pgbovine.net"]);
                 }
             }
             else {

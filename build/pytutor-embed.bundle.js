@@ -3274,7 +3274,7 @@ var CodeDisplay = /** @class */ (function () {
             this.domRoot.find('#editCodeLinkDiv').css('font-size', '10pt');
         }
         this.domRoot.find('#legendDiv')
-            .append('<svg id="prevLegendArrowSVG"/> line that has just executed')
+            .append('<svg id="prevLegendArrowSVG"/>  current line executes')
             .append('<p style="margin-top: 4px"><svg id="curLegendArrowSVG"/> next line to execute</p>');
         this.domRootD3.select('svg#prevLegendArrowSVG')
             .append('polygon')

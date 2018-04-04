@@ -3104,6 +3104,7 @@
 		position: absolute;
 	}
 
+
 	#header_input{
 		background-color: #4686a0;
 		color: rgba(255, 255, 255, 0.75);
@@ -3112,7 +3113,7 @@
 		background-size: auto, cover, cover;
 		overflow: hidden;
 		position: relative;
-		padding-bottom: 150px; 
+		padding-bottom: 150px;
 	}
 /* console css */
 	#console{
@@ -3164,6 +3165,18 @@
 		left:50px;
 		color: white;
 		z-index: 10;
+	}
+
+	#save-file{
+		width: 110px;
+		height: 40px;
+		position: absolute;
+		z-index: 10;
+		top:20px;
+		left: 160px;
+		background-color: white;
+		color: black;
+		border-radius: 50px;
 	}
 
 	#genUrlBtn{

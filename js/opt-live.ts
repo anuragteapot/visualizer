@@ -81,7 +81,7 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
     super(params);
 
     $('#legendDiv')
-      .append('<svg id="prevLegendArrowSVG"/> line that has just executed')
+      .append('<svg id="prevLegendArrowSVG"/> current line executes')
       .append('<p style="margin-top: 4px"><svg id="curLegendArrowSVG"/> next line to execute</p>');
 
     d3.select('svg#prevLegendArrowSVG')
@@ -237,9 +237,9 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
         curEntry.event === 'uncaught_exception') {
       assert(curEntry.exception_msg);
       if (curEntry.exception_msg == "Unknown error") {
-        $(".frontendErrorOutput").html('Unknown error: Please email a bug report to philip@pgbovine.net');
+        $("#frontendErrorOutput").html('Unknown error: Please email a bug report to philip@pgbovine.net');
       } else {
-        $(".frontendErrorOutput").html(htmlspecialchars(curEntry.exception_msg));
+        $("#frontendErrorOutput").html(htmlspecialchars(curEntry.exception_msg));
       }
 
       if (myVisualizer.curLineNumber) {
@@ -249,9 +249,9 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
         this.allMarkerIds.push(markerId);
       }
     } else if (myVisualizer.instrLimitReached) {
-      $(".frontendErrorOutput").html(htmlspecialchars(myVisualizer.instrLimitReachedWarningMsg));
+      $("#frontendErrorOutput").html(htmlspecialchars(myVisualizer.instrLimitReachedWarningMsg));
     } else {
-      $(".frontendErrorOutput").html(''); // clear it
+      $("#frontendErrorOutput").html(''); // clear it
     }
 
     this.removeAllGutterDecorations();
@@ -561,8 +561,7 @@ export class OptLiveFrontend extends OptFrontendSharedSessions {
           this.setFronendError(
                           ["Unknown error: The server may be OVERLOADED right now; try again later.",
                            "Your code may also contain UNSUPPORTED FEATURES that this tool cannot handle.",
-                           "Report a bug to philip@pgbovine.net by clicking the 'Generate shortened link'",
-                           "button at the bottom and including a URL in your email. [#NullTrace]"]);
+                           ]);
         }
       } else {
         this.prevVisualizer = this.myVisualizer;
