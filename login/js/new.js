@@ -115,6 +115,36 @@ $(document).ready(function(){
 
 
 $(document).ready(function(){
+
+    $("#files_btn").click(function(){
+
+        var submit = 'submit';
+
+      $.post("files/index.php",
+       {
+         submit:submit,
+       },
+
+      function(data,status){
+
+            if(status=="success")
+            {
+
+
+              window.open(
+                'http://localhost/project/vis/OnlinePythonTutor-master/v5-unity/files/',
+                '_blank' // <- This is what makes it open in a new window.
+              );
+
+             }
+
+          });
+    });
+});
+
+
+
+$(document).ready(function(){
   $("a").on('click', function(event) {
     if (this.hash !== "") {
       event.preventDefault()

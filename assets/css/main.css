@@ -3210,6 +3210,20 @@
 		font-size: 30px;
 	}
 
+	#files{
+		position: absolute;
+		top:20px;
+		right:200px;
+		color: white;
+		z-index: 10;
+	}
+
+	#files_btn{
+		color: white!important;
+		background-color:#2f889a;
+		border-radius: 50px;
+	}
+
 /*snakbar*/
 	#snackbar {
 	    visibility: hidden;

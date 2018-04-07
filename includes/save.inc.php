@@ -2,13 +2,20 @@
 
   include_once 'dbh.inc.php';
 
-  $code = $_POST['code'];
-  $name = $_POST['name'];
-  $user = $_SESSION['u_username'];
-  $user=strtoupper($user);
+  if(!isset($_SESSION['u_username']) || !isset($_POST['code']))
+  {
+    header("Location: ../");
+  } 
+
+  @$code = $_POST['code'];
+  @$name = $_POST['name'];
+  @$user = $_SESSION['u_username'];
+  @$user=strtoupper($user);
+
+
 
   $file = '../uploads/'.$user.'/'.$name.'.c';
-  $current_dir="/opt/lampp/htdocs/project/vis/OnlinePythonTutor-master/v5-unity/";
+  $current_dir="/opt/lampp/htdocs/project/vis/OnlinePythonTutor-master/v5-unity";
 
   if(!is_dir($current_dir.'/uploads/'.$user))
   {

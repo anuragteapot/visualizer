@@ -25,10 +25,13 @@
 <body  id="body">
 <?php
 if(isset($_SESSION['u_username'])) {
-	echo '<div id="save" ></div>';
-	echo '<div id="logout" ><button id="logout_btn">Logout</button></div>';
-	echo '<div id="user" ><p id="user_txt">Hi '.$_SESSION['u_name'].'</p></div>';
-}
+ ?>
+		<div id="save" ></div><input id="save-file" type="text" placeholder="File-name" value="<?php  if(isset($_SESSION['save-file'])) { echo $_SESSION['save-file']; } ?>"/>
+		<div id="logout" ><button id="logout_btn">Logout</button></div>
+		<div id="files" ><button id="files_btn" >My Files</button></div>
+	<?php
+		echo '<div id="user" ><p id="user_txt">Hi '.$_SESSION['u_name'].'</p></div>';	
+	}
 ?>
 		<header role="banner">
 	<!--		<div id="cd-logo">
