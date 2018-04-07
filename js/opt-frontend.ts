@@ -116,15 +116,14 @@ export class OptFrontend extends AbstractBaseFrontend {
 
     $('#genUrlBtn').bind('click', () => {
         var editorVal = $.trim(this.pyInputGetValue());
-        var name = 'file';
-        var user = 'Anurag';
+        var name = $('#save-file').val();
 
         $.ajax({
        	   type: "POST",
        	   url: "includes/save.inc.php",
-       	   data: { code : editorVal, name : name ,user : user }
+       	   data: { code : editorVal, name : name }
        	}).done(function(msg){
-            $('#snackbar').text("Saved");
+            $('#snackbar').text(msg);
             $('#snackbar').addClass("show");
             setTimeout(function(){ $('#snackbar').removeClass("show");}, 3000);
           });
@@ -163,10 +162,6 @@ export class OptFrontend extends AbstractBaseFrontend {
     // still a bit flaky ... TODO: investigate :(
     $(window).on('beforeunload', () => {
       this.submitUpdateHistory('beforeunload');
-      //window.onbeforeunload = function(event)
-    //  {
-      // return confirm("Confirm refresh");
-      //  };
       // don't return anything, or a modal dialog box might pop up
     });
 
