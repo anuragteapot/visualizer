@@ -6,8 +6,15 @@ if(isset($_SESSION['u_username']))
   {
     include_once 'dbh.inc.php';
 
-    $file=mysqli_real_escape_string($conn ,$_GET['file']);
-    $id=mysqli_real_escape_string($conn ,$_GET['tok']);
+    $file =  mysqli_real_escape_string($conn ,$_GET['file']);
+    $id = mysqli_real_escape_string($conn ,$_GET['tok']);
+    $status = mysqli_real_escape_string($conn ,$_GET['fav']);
+
+    if($status) {
+      $status = 0;
+    } else {
+      $status = 1;
+    }
 
     if(!empty($file))
     {
@@ -18,11 +25,13 @@ if(isset($_SESSION['u_username']))
       $row=mysqli_fetch_assoc($result);
         if($row > 0)
         {
-          $sql="DELETE FROM code WHERE id='$id' AND username='$user'";
-          @mysqli_query($conn,$sql);
-          $file_path='/opt/lampp/htdocs/project/vis/OnlinePythonTutor-master/v5-unity/uploads/'.$user.'/'.$file.'.c';
-          @unlink($file_path);
-          header("Location: ../files/");
+          $sql="UPDATE code SET fav='$status' WHERE username='$user' AND id='$id'";
+          if(mysqli_query($conn,$sql))
+          {
+            header("Location: ../files/");
+          } else {
+            echo 'Server Error';
+          }
           exit();
         }
       }

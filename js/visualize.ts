@@ -317,39 +317,6 @@ export class OptFrontendWithTestcases extends OptFrontendSharedSessions {
         }
       });
 
-      /*
-      var version = 'v3'; // deployed on 2015-09-08
-      var surveyBubbleHTML = '<div id="syntaxErrBubbleContents">\
-                                <div id="syntaxErrHeader">You just fixed the following error:</div>\
-                                <div id="syntaxErrCodeDisplay"></div>\
-                                <div id="syntaxErrMsg"></div>\
-                                <div id="syntaxErrQuestion">\
-                                  Please help us improve error messages for future users.\
-                                   If you think the above message wasn\'t helpful, what would have been the best message for you here?<br/>\
-                                   <input type="text" id="syntaxErrTxtInput" size=60 maxlength=150/><br/>\
-                                   <button id="syntaxErrSubmitBtn" type="button">Submit</button>\
-                                   <button id="syntaxErrCloseBtn" type="button">Close</button>\
-                                   <a href="#" id="syntaxErrHideAllLink">Hide all of these pop-ups</a>\
-                                </div>\
-                              </div>'
-      */
-
-      /*
-      var version = 'v4'; // deployed on 2017-05-15
-      var surveyBubbleHTML = '<div id="syntaxErrBubbleContents">\
-                                <div id="syntaxErrHeader">You just fixed the following error:</div>\
-                                <div id="syntaxErrCodeDisplay"></div>\
-                                <div id="syntaxErrMsg"></div>\
-                                <div id="syntaxErrQuestion">\
-                                  Please help us improve this tool.\
-                                  What would have been the most helpful error message for you to see here?<br/>\
-                                   <input type="text" id="syntaxErrTxtInput" size=62 maxlength=150/><br/>\
-                                   <button id="syntaxErrSubmitBtn" type="button">Submit</button>\
-                                   <button id="syntaxErrCloseBtn" type="button">Close</button>\
-                                   <a href="#" id="syntaxErrHideAllLink">Hide all of these pop-ups</a>\
-                                </div>\
-                              </div>'
-      */
 
       var version = 'v5'; // deployed on 2017-05-20
       // directly ask about what they thought caused the error instead of having them (indirectly)

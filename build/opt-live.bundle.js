@@ -622,14 +622,14 @@ exports.SVG_ARROW_POLYGON = '0,3 12,3 12,0 18,5 12,10 12,7 0,7';
 var SVG_ARROW_HEIGHT = 10; // must match height of SVG_ARROW_POLYGON
 /* colors - see pytutor.css for more colors */
 exports.brightRed = '#e93f34';
-var connectorBaseColor = '#005583';
+var connectorBaseColor = '#e93f34';
 var connectorHighlightColor = exports.brightRed;
 var connectorInactiveColor = '#cccccc';
 var errorColor = exports.brightRed;
 var breakpointColor = exports.brightRed;
 // Unicode arrow types: '\u21d2', '\u21f0', '\u2907'
 exports.darkArrowColor = exports.brightRed;
-exports.lightArrowColor = '#c9e6ca';
+exports.lightArrowColor = '#e93f34';
 var heapPtrSrcRE = /__heap_pointer_src_/;
 var rightwardNudgeHack = true; // suggested by John DeNero, toggle with global
 // returns a list of length a.length * b.length with elements from both
@@ -3294,10 +3294,10 @@ var CodeDisplay = /** @class */ (function () {
         // also changed 'Edit code' link to 'Edit this code' to make
         // it more clear to users
         var codeDisplayHTML = '<div id="codeDisplayDiv">\
+      <div id="editCodeLinkDiv"><a id="editBtn" title="Edit Code"><img src="images/edit.png"></a>\
+      </div>\
          <div id="langDisplayDiv"></div>\
          <div id="pyCodeOutputDiv"/>\
-         <div id="editCodeLinkDiv"><a id="editBtn">Edit this code</a>\
-         </div>\
          <div id="legendDiv"/>\
          <div id="codeFooterDocs"></div>\
        </div>';
@@ -3305,9 +3305,6 @@ var CodeDisplay = /** @class */ (function () {
         if (this.owner.params.embeddedMode) {
             this.domRoot.find('#editCodeLinkDiv').css('font-size', '10pt');
         }
-        this.domRoot.find('#legendDiv')
-            .append('<svg id="prevLegendArrowSVG"/>  current line executes')
-            .append('<p style="margin-top: 4px"><svg id="curLegendArrowSVG"/> next line to execute</p>');
         this.domRootD3.select('svg#prevLegendArrowSVG')
             .append('polygon')
             .attr('points', exports.SVG_ARROW_POLYGON)
@@ -3366,10 +3363,10 @@ var CodeDisplay = /** @class */ (function () {
             }
             else if (lang === 'c') {
                 if (this.owner.params.embeddedMode) {
-                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+                    this.domRoot.find('#langDisplayDiv').html('');
                 }
                 else {
-                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+                    this.domRoot.find('#langDisplayDiv').html('');
                 }
             }
             else if (lang === 'cpp') {
@@ -3633,14 +3630,15 @@ var NavigationController = /** @class */ (function () {
                      <div id="executionSliderFooter"/>\
                      <div id="vcrControls">\
                      <span id="curInstr">Step ? of ?</span><br>\
-                       <button id="jmpFirstInstr", type="button" onclick="console()">&lt;&lt; First</button>\
-                       <button id="jmpStepBack", type="button" onclick="console()">&lt; Back</button>\
-                       <button id="jmpStepFwd", type="button" onclick="console()">Forward &gt;</button>\
-                       <button id="jmpLastInstr", type="button" onclick="console()">Last &gt;&gt;</button>\
+                       <button id="jmpFirstInstr", type="button" onclick="console()">First</button>\
+                       <button id="jmpStepBack", type="button" onclick="console()">Back</button>\
+                       <button id="jmpStepFwd", type="button" onclick="console()">Forward</button>\
+                       <button id="jmpLastInstr", type="button" onclick="console()">Last</button>\
                      </div>\
                      <div id="select_exc"><br>\
                      <h1>Select timer</h1>\
                        <select id="option_exc">\
+                          <option value="500">0.5 Sec</option>\
                           <option value="1000">1 Sec</option>\
                           <option value="2000">2 Sec</option>\
                           <option value="4000">4 Sec</option>\
@@ -4021,6 +4019,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
                 else {
                     _this.setFronendError(["Server error! Your code might be too long for this tool. Shorten your code and re-try. [#CodeTooLong]"]);
                     _this.num414Tries = 0; // reset this to 0 AFTER setFronendError so that in setFronendError we can know that it's a 414 error (super hacky!)
+                    _this.doneExecutingCode();
                 }
             }
             else {
@@ -4043,8 +4042,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
     AbstractBaseFrontend.prototype.getAppState = function () { return {}; }; // NOP -- subclasses need to override
     AbstractBaseFrontend.prototype.setFronendError = function (lines, ignoreLog) {
         if (ignoreLog === void 0) { ignoreLog = false; }
-        $("#frontendErrorOutput").html(lines.map(pytutor_1.htmlspecialchars).join('<br/>') +
-            (ignoreLog ? '' : '<p/>Here is a list of <a target="_blank" href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md">UNSUPPORTED FEATURES</a>'));
+        $("#output_ex").html(lines);
         // log it to the server as well (unless ignoreLog is on)
         if (!ignoreLog) {
             var errorStr = lines.join();
@@ -4343,69 +4341,6 @@ var AbstractBaseFrontend = /** @class */ (function () {
     return AbstractBaseFrontend;
 }()); // END class AbstractBaseFrontend
 exports.AbstractBaseFrontend = AbstractBaseFrontend;
-/* For survey questions. Versions of survey wording:
-
-[see ../../v3/js/opt-frontend-common.js for older versions of survey wording - v1 to v7]
-
-v8: (deployed on 2016-06-20) - like v7 except emphasize the main usage survey more, and have the over-60 survey as auxiliary
-const survey_v8 = '\n\
-<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
-<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1-aKilu0PECHZVRSIXHv8vJpEuKUO9uG3MrH864uX56U/viewform" target="_blank">filling out this user survey</a>.</span>\n\
-<br/>\n\
-<span style="font-size: 9pt;">If you are <b>at least 60 years old</b>, please also fill out <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank">our survey about learning programming</a>.</span>\n\
-</p>'
-
-v9: (deployed on 2016-08-14, taken down 2016-12-05) - only put up the "older adults" survey except generalize it to ALL ages, take down the OPT usage survey for now
-const survey_v9 = '\n\
-<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
-<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank"><b>filling out this user survey</b></a>.</span>\n\
-</p>'
-
-v10: (deployed on 2016-12-05) - survey of how native languages affects learning programming
-     (taken down on 2017-07-28)
-[see survey_v10 variable above]
-
-    // use ${this.userUUID} within the string ...
-    var survey_v10 = '\n\
-    <p style="font-size: 11pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
-    <span><span style="color: #e93f34;">Support our research and keep this tool free</span> by filling out this <a href="https://docs.google.com/forms/d/e/1FAIpQLSe48NsBZPvu1hrTBwc8-aSic7nPSxpsxFqpUxV5AN4LwnyJWg/viewform?entry.956368502=';
-    survey_v10 += this.userUUID;
-    survey_v10 += '" target="_blank">survey on how your native spoken language affects how you learn programming</a>.</span></p>';
-
-    $('#surveyPane').html(survey_v10);
-
-v11: labinthewild python debugging experiment (deployed on 2017-07-28, taken down on 2017-09-12)
-    var survey_v11 = `<p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">
-                        <span>
-                          <span style="color: #e93f34;">Support our research and practice Python</span>
-                          by trying our new
-                          <a target="_blank" href="http://www.labinthewild.org/studies/python_tutor/">debugging skill test</a>!`;
-
-v12: simplified demographic survey which is a simplified hybrid of the v8 general usage survey and the v10 native language survey (deployed on 2017-09-12)
-
-    // use ${this.userUUID} within the string ...
-    var survey_v12 = '\n\
-    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
-    <span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
-    survey_v12 += this.userUUID;
-    survey_v12 += '" target="_blank"><b>filling out this short user survey</b></a>.</span></p>';
-
-v13: same as v12 except with slightly different wording, and adding a
-call for donations (deployed on 2017-12-27)
-
-    // use ${this.userUUID} within the string ...
-    var survey_v13 = '\n\
-    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
-    <div style="margin-bottom: 12px;">Keep this tool free for everyone by <a href="http://pgbovine.net/support.htm" target="_blank"><b>making a small donation</b></a> <span style="font-size: 8pt;">(PayPal, Patreon, credit/debit card)</span></div>\
-    <span>Support our research by completing a <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
-    survey_v13 += this.userUUID;
-    survey_v13 += '" target="_blank"><b>short user survey</b></a></span></p>';
-
-
-v14: very similar to v13 (deployed on 2018-03-11)
-[see the survey_v14 variable]
-
-*/
 // misc utilities:
 // From http://stackoverflow.com/a/8809472
 function generateUUID() {

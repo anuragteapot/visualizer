@@ -5,14 +5,12 @@
   if(!isset($_SESSION['u_username']) || !isset($_POST['code']))
   {
     header("Location: ../");
-  } 
+  }
 
   @$code = $_POST['code'];
   @$name = $_POST['name'];
   @$user = $_SESSION['u_username'];
   @$user=strtoupper($user);
-
-
 
   $file = '../uploads/'.$user.'/'.$name.'.c';
   $current_dir="/opt/lampp/htdocs/project/vis/OnlinePythonTutor-master/v5-unity";
@@ -53,11 +51,8 @@
         else {
           $query="INSERT INTO code(username,code,time,file,path) VALUES ('$user','$code',NOW(),'$name','$path')";
         }
-
-      mysqli_query($conn,$query);
-      exit();
+        if(!mysqli_query($conn,$query)) {
+          echo 'Server Error';
+        }
+        exit();
  }
-
-
-
-?>

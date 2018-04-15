@@ -590,14 +590,14 @@ exports.SVG_ARROW_POLYGON = '0,3 12,3 12,0 18,5 12,10 12,7 0,7';
 var SVG_ARROW_HEIGHT = 10; // must match height of SVG_ARROW_POLYGON
 /* colors - see pytutor.css for more colors */
 exports.brightRed = '#e93f34';
-var connectorBaseColor = '#005583';
+var connectorBaseColor = '#e93f34';
 var connectorHighlightColor = exports.brightRed;
 var connectorInactiveColor = '#cccccc';
 var errorColor = exports.brightRed;
 var breakpointColor = exports.brightRed;
 // Unicode arrow types: '\u21d2', '\u21f0', '\u2907'
 exports.darkArrowColor = exports.brightRed;
-exports.lightArrowColor = '#c9e6ca';
+exports.lightArrowColor = '#e93f34';
 var heapPtrSrcRE = /__heap_pointer_src_/;
 var rightwardNudgeHack = true; // suggested by John DeNero, toggle with global
 // returns a list of length a.length * b.length with elements from both
@@ -3262,10 +3262,10 @@ var CodeDisplay = /** @class */ (function () {
         // also changed 'Edit code' link to 'Edit this code' to make
         // it more clear to users
         var codeDisplayHTML = '<div id="codeDisplayDiv">\
+      <div id="editCodeLinkDiv"><a id="editBtn" title="Edit Code"><img src="images/edit.png"></a>\
+      </div>\
          <div id="langDisplayDiv"></div>\
          <div id="pyCodeOutputDiv"/>\
-         <div id="editCodeLinkDiv"><a id="editBtn">Edit this code</a>\
-         </div>\
          <div id="legendDiv"/>\
          <div id="codeFooterDocs"></div>\
        </div>';
@@ -3273,9 +3273,6 @@ var CodeDisplay = /** @class */ (function () {
         if (this.owner.params.embeddedMode) {
             this.domRoot.find('#editCodeLinkDiv').css('font-size', '10pt');
         }
-        this.domRoot.find('#legendDiv')
-            .append('<svg id="prevLegendArrowSVG"/>  current line executes')
-            .append('<p style="margin-top: 4px"><svg id="curLegendArrowSVG"/> next line to execute</p>');
         this.domRootD3.select('svg#prevLegendArrowSVG')
             .append('polygon')
             .attr('points', exports.SVG_ARROW_POLYGON)
@@ -3334,10 +3331,10 @@ var CodeDisplay = /** @class */ (function () {
             }
             else if (lang === 'c') {
                 if (this.owner.params.embeddedMode) {
-                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+                    this.domRoot.find('#langDisplayDiv').html('');
                 }
                 else {
-                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+                    this.domRoot.find('#langDisplayDiv').html('');
                 }
             }
             else if (lang === 'cpp') {
@@ -3601,14 +3598,15 @@ var NavigationController = /** @class */ (function () {
                      <div id="executionSliderFooter"/>\
                      <div id="vcrControls">\
                      <span id="curInstr">Step ? of ?</span><br>\
-                       <button id="jmpFirstInstr", type="button" onclick="console()">&lt;&lt; First</button>\
-                       <button id="jmpStepBack", type="button" onclick="console()">&lt; Back</button>\
-                       <button id="jmpStepFwd", type="button" onclick="console()">Forward &gt;</button>\
-                       <button id="jmpLastInstr", type="button" onclick="console()">Last &gt;&gt;</button>\
+                       <button id="jmpFirstInstr", type="button" onclick="console()">First</button>\
+                       <button id="jmpStepBack", type="button" onclick="console()">Back</button>\
+                       <button id="jmpStepFwd", type="button" onclick="console()">Forward</button>\
+                       <button id="jmpLastInstr", type="button" onclick="console()">Last</button>\
                      </div>\
                      <div id="select_exc"><br>\
                      <h1>Select timer</h1>\
                        <select id="option_exc">\
+                          <option value="500">0.5 Sec</option>\
                           <option value="1000">1 Sec</option>\
                           <option value="2000">2 Sec</option>\
                           <option value="4000">4 Sec</option>\

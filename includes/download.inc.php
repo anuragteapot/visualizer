@@ -1,5 +1,5 @@
 <?php session_start();
-	
+
 	if(!isset($_SESSION['u_username']) || !isset($_GET['file'])){
 		header("Location: ../");
 	}
@@ -9,7 +9,7 @@
 
 
 if (isset($_GET['file']) && basename($_GET['file']) == $_GET['file']) {
-	$filename = $_GET['file'];
+	$filename = $_GET['file'].'.c';
 } else {
 	$filename = NULL;
 }
@@ -32,6 +32,8 @@ if ($filename) {
 			// stream the file and exit the script when complete
 			fpassthru($file);
 			exit;
-		} 
-	} 
+		}
+	}
+} else {
+	echo 'Server Error';
 }

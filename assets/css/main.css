@@ -2711,7 +2711,7 @@
 			color: rgba(255, 255, 255, 0.75);
 			background-attachment: fixed,							fixed;
 			background-image: url("images/overlay1.png"), url("../../images/header.jpg");
-			background-size: auto,							cover;
+			background-size: auto,cover;
 		}
 
 			.main.style2 a {
@@ -3067,6 +3067,17 @@
 		color: white!important;
 		background-color: #1c1c1c!important;
 		margin: 30px 0;
+	}
+
+	#curLineArrow,#prevLegendArrowSVG{
+		visibility: hidden!important;
+	}
+
+	#stackHeader{
+		text-align: center;
+	}
+	.stackFrameVar{
+		width: 200px!important;
 	}
 
 .container{
