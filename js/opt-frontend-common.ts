@@ -1,13 +1,4 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
 
-/* TODO
-
-- we're always referring to top-level CSS selectors on the page; maybe
-  use a this.domRoot pattern like in pytutor.ts?
-
-*/
 
 /// <reference path="_references.ts" />
 
@@ -21,13 +12,6 @@ require('./lib/jquery.ba-dotimeout.min.js');
 
 // need to directly import the class for type checking to work
 import {ExecutionVisualizer, assert, htmlspecialchars} from './pytutor';
-
-
-// the main event!
-//
-// NB: this still relies on global state such as localStorage and the
-// browser URL hash string, so you still can't have more than one of these
-// objects per page; should still be instantiated as a SINGLETON
 export abstract class AbstractBaseFrontend {
   sessionUUID: string = generateUUID(); // remains constant throughout one page load ("session")
   userUUID: string; // remains constant for a particular "user" throughout multiple page loads (stored in localStorage on a particular browser)

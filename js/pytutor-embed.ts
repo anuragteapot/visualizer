@@ -1,7 +1,3 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
-
 import {ExecutionVisualizer} from './pytutor';
 
 var allVisualizers = [];
@@ -28,20 +24,6 @@ function addVisualizerToPage(trace, divId, params) {
     params.editCodeBaseURL = 'http://pythontutor.com/visualize.html';
   }
 
-  // When some div in your webpage (such as a visualizer div) expands in height,
-  // it will "push down" all divs below it, but the SVG arrows rendered by
-  // jsPlumb WILL NOT MOVE. Thus, they will be in the incorrect location unless
-  // you call redrawAllConnectors().
-  //
-  // We use the "heightChangeCallback" optional parameter to force redraw
-  // of all SVG arrows of ALL visualizers, whenever the height of one changes.
-  //
-  // Alternatively, here is one jQuery plugin that you can use to detect
-  // div height changes: http://benalman.com/projects/jquery-resize-plugin/
-  //
-  // A related trick you can implement is to make a div never shrink in height
-  // once it's grown; that way, you can avoid lots of jarring jumps and
-  // (inefficient) redraws.
   params.heightChangeCallback = redrawAllVisualizerArrows;
 
   var ret = new ExecutionVisualizer(divId, trace, params);

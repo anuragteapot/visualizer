@@ -586,56 +586,26 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAADwCAMAAADY
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, jQuery) {
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
 Object.defineProperty(exports, "__esModule", { value: true });
-/* TODO:
-
-- substitute in a non-live version of the live editor from opt-live.js
-  in addition to the janky current version of the editor
-
-*/
-/* pytutor coding gotchas:
-
-- *NEVER* use raw $(__) or d3.select(__) statements to select DOM elements.
-
-  *ALWAYS* use myViz.domRoot or myViz.domRootD3 for jQuery and D3, respectively.
-
-  Otherwise things will break in weird ways when you have more than one
-  visualization embedded within a webpage, due to multiple matches in
-  the global namespace.
-
-- always use generateID and generateHeapObjID to generate unique CSS
-  IDs, or else things will break when multiple ExecutionVisualizer
-  instances are on a webpage
-
-*/
 __webpack_require__(8);
 __webpack_require__(0);
-__webpack_require__(11); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR
+__webpack_require__(11);
 __webpack_require__(9);
 __webpack_require__(15);
-__webpack_require__(10); // contains slight pgbovine modifications
+__webpack_require__(10);
 __webpack_require__(14);
 exports.SVG_ARROW_POLYGON = '0,3 12,3 12,0 18,5 12,10 12,7 0,7';
-var SVG_ARROW_HEIGHT = 10; // must match height of SVG_ARROW_POLYGON
-/* colors - see pytutor.css for more colors */
+var SVG_ARROW_HEIGHT = 10;
 exports.brightRed = '#e93f34';
 var connectorBaseColor = '#e93f34';
 var connectorHighlightColor = exports.brightRed;
 var connectorInactiveColor = '#cccccc';
 var errorColor = exports.brightRed;
 var breakpointColor = exports.brightRed;
-// Unicode arrow types: '\u21d2', '\u21f0', '\u2907'
 exports.darkArrowColor = exports.brightRed;
 exports.lightArrowColor = '#e93f34';
 var heapPtrSrcRE = /__heap_pointer_src_/;
-var rightwardNudgeHack = true; // suggested by John DeNero, toggle with global
-// returns a list of length a.length * b.length with elements from both
-// mixed. the elements of a and b should be primitives, but if the first element
-// is a list, it flattens it. e.g.,:
-//   multiplyLists([1, 2, 3], [4, 5]) -> [[1,4], [1,5], [2,4], [2,5], [3,4], [3,5]]
+var rightwardNudgeHack = true;
 function multiplyLists(a, b) {
     var ret = [];
     for (var i = 0; i < a.length; i++) {
@@ -654,58 +624,8 @@ function multiplyLists(a, b) {
 }
 // the main event!
 var ExecutionVisualizer = /** @class */ (function () {
-    // Constructor with an ever-growing feature-crepped list of options :)
-    // domRootID is the string ID of the root element where to render this instance
-    //
-    // dat is data returned by the Python Tutor backend consisting of two fields:
-    //   code  - string of executed code
-    //   trace - a full execution trace
-    //
-    // params is an object containing optional parameters, such as:
-    //   jumpToEnd - if non-null, jump to the very end of execution if
-    //               there's no error, or if there's an error, jump to the
-    //               FIRST ENTRY with an error
-    //   startingInstruction - the (zero-indexed) execution point to display upon rendering
-    //                         if this is set, then it *overrides* jumpToEnd
-    //   codeDivHeight - maximum height of #pyCodeOutputDiv (in integer pixels)
-    //   codeDivWidth  - maximum width  of #pyCodeOutputDiv (in integer pixels)
-    //   editCodeBaseURL - the base URL to visit when the user clicks 'Edit code' (if null, then 'Edit code' link hidden)
-    //   embeddedMode         - shortcut for codeDivWidth=DEFAULT_EMBEDDED_CODE_DIV_WIDTH,
-    //                                       codeDivHeight=DEFAULT_EMBEDDED_CODE_DIV_HEIGHT
-    //                          (and hide a bunch of other stuff & don't activate keyboard shortcuts!)
-    //   disableHeapNesting   - if true, then render all heap objects at the top level (i.e., no nested objects)
-    //   drawParentPointers   - if true, then draw environment diagram parent pointers for all frames
-    //                          WARNING: there are hard-to-debug MEMORY LEAKS associated with activating this option
-    //   textualMemoryLabels  - render references using textual memory labels rather than as jsPlumb arrows.
-    //                          this is good for slow browsers or when used with disableHeapNesting
-    //                          to prevent "arrow overload"
-    //   updateOutputCallback - function to call (with 'this' as parameter)
-    //                          whenever this.updateOutput() is called
-    //                          (BEFORE rendering the output display)
-    //   heightChangeCallback - function to call (with 'this' as parameter)
-    //                          whenever the HEIGHT of #dataViz changes
-    //   verticalStack - if true, then stack code display ON TOP of visualization
-    //                   (else place side-by-side)
-    //   visualizerIdOverride - override visualizer ID instead of auto-assigning it
-    //                          (BE CAREFUL ABOUT NOT HAVING DUPLICATE IDs ON THE SAME PAGE,
-    //                           OR ELSE ARROWS AND OTHER STUFF WILL GO HAYWIRE!)
-    //   executeCodeWithRawInputFunc - function to call when you want to re-execute the given program
-    //                                 with some new user input (somewhat hacky!)
-    //   compactFuncLabels - render functions with a 'func' prefix and no type label
-    //   showAllFrameLabels - display frame and parent frame labels for all functions (default: false)
-    //   hideCode - hide the code display and show only the data structure viz
-    //   lang - to render labels in a style appropriate for other languages,
-    //          and to display the proper language in langDisplayDiv:
-    //          'py2' for Python 2, 'py3' for Python 3, 'js' for JavaScript, 'java' for Java,
-    //          'ts' for TypeScript, 'ruby' for Ruby, 'c' for C, 'cpp' for C++
-    //          [default is Python-style labels]
     function ExecutionVisualizer(domRootID, dat, params) {
         this.params = {};
-        // an array of objects with the following fields:
-        //   'text' - the text of the line of code
-        //   'lineNumber' - one-indexed (always the array index + 1)
-        //   'executionPoints' - an ordered array of zero-indexed execution points where this line was executed
-        //   'breakpointHere' - has a breakpoint been set here?
         this.codeOutputLines = [];
         this.curInstr = 0;
         // API for adding a hook, created by David Pritchard
@@ -800,60 +720,12 @@ var ExecutionVisualizer = /** @class */ (function () {
         this.try_hook("end_constructor", { myViz: this });
         this.render(); // go for it!
     }
-    /* API for adding a hook, created by David Pritchard
-       https://github.com/daveagp
-  
-      [this documentation is a bit deprecated since Philip made try_hook a
-       method of ExecutionVisualizer, but the general ideas remain]
-  
-     An external user should call
-       add_pytutor_hook("hook_name_here", function(args) {...})
-     args will be a javascript object with several named properties;
-     this is meant to be similar to Python's keyword arguments.
-  
-     The hooked function should return an array whose first element is a boolean:
-     true if it completely handled the situation (no further hooks
-     nor the base function should be called); false otherwise (wasn't handled).
-     If the hook semantically represents a function that returns something,
-     the second value of the returned array is that semantic return value.
-  
-     E.g. for the Java visualizer a simplified version of a hook we use is:
-  
-    add_pytutor_hook(
-      "isPrimitiveType",
-      function(args) {
-        var obj = args.obj; // unpack
-        if (obj instanceof Array && obj[0] == "CHAR-LITERAL")
-          return [true, true]; // yes we handled it, yes it's primitive
-        return [false]; // didn't handle it, let someone else
-      });
-  
-     Hook callbacks can return false or undefined (i.e. no return
-     value) in lieu of [false].
-  
-     NB: If multiple functions are added to a hook, the oldest goes first. */
     ExecutionVisualizer.prototype.add_pytutor_hook = function (hook_name, func) {
         if (this.pytutor_hooks[hook_name])
             this.pytutor_hooks[hook_name].push(func);
         else
             this.pytutor_hooks[hook_name] = [func];
     };
-    /*  [this documentation is a bit deprecated since Philip made try_hook a
-         method of ExecutionVisualizer, but the general ideas remain]
-  
-    try_hook(hook_name, args): how the internal codebase invokes a hook.
-  
-    args will be a javascript object with several named properties;
-    this is meant to be similar to Python's keyword arguments. E.g.,
-  
-    function isPrimitiveType(obj) {
-      var hook_result = try_hook("isPrimitiveType", {obj:obj});
-      if (hook_result[0]) return hook_result[1];
-      // go on as normal if the hook didn't handle it
-  
-    Although add_pytutor_hook allows the hooked function to
-    return false or undefined, try_hook will always return
-    something with the strict format [false], [true] or [true, ...]. */
     ExecutionVisualizer.prototype.try_hook = function (hook_name, args) {
         if (this.pytutor_hooks[hook_name]) {
             for (var i = 0; i < this.pytutor_hooks[hook_name].length; i++) {
@@ -905,8 +777,6 @@ var ExecutionVisualizer = /** @class */ (function () {
             if (this.params.codeDivHeight === undefined) {
                 this.params.codeDivHeight = ExecutionVisualizer.DEFAULT_EMBEDDED_CODE_DIV_HEIGHT;
             }
-            // add an extra label to link back to the main site, so that viewers
-            // on the embedded page know that they're seeing an OPT visualization
             base.find('#codeFooterDocs').hide(); // cut out extraneous docs
         }
         // not enough room for these extra buttons ...
@@ -1629,40 +1499,7 @@ var DataVisualizer = /** @class */ (function () {
             renderedHeapObjectIDs: d3.map(),
         };
     };
-    // this method initializes curTraceLayouts
-    //
-    // Pre-compute the layout of top-level heap objects for ALL execution
-    // points as soon as a trace is first loaded. The reason why we want to
-    // do this is so that when the user steps through execution points, the
-    // heap objects don't "jiggle around" (i.e., preserving positional
-    // invariance). Also, if we set up the layout objects properly, then we
-    // can take full advantage of d3 to perform rendering and transitions.
     DataVisualizer.prototype.precomputeCurTraceLayouts = function () {
-        // curTraceLayouts is a list of top-level heap layout "objects" with the
-        // same length as curTrace after it's been fully initialized. Each
-        // element of curTraceLayouts is computed from the contents of its
-        // immediate predecessor, thus ensuring that objects don't "jiggle
-        // around" between consecutive execution points.
-        //
-        // Each top-level heap layout "object" is itself a LIST of LISTS of
-        // object IDs, where each element of the outer list represents a row,
-        // and each element of the inner list represents columns within a
-        // particular row. Each row can have a different number of columns. Most
-        // rows have exactly ONE column (representing ONE object ID), but rows
-        // containing 1-D linked data structures have multiple columns. Each
-        // inner list element looks something like ['row1', 3, 2, 1] where the
-        // first element is a unique row ID tag, which is used as a key for d3 to
-        // preserve "object constancy" for updates, transitions, etc. The row ID
-        // is derived from the FIRST object ID inserted into the row. Since all
-        // object IDs are unique, all row IDs will also be unique.
-        /* This is a good, simple example to test whether objects "jiggle"
-    
-        x = [1, [2, [3, None]]]
-        y = [4, [5, [6, None]]]
-    
-        x[1][1] = y[1]
-    
-        */
         this.curTraceLayouts = [];
         this.curTraceLayouts.push([]); // pre-seed with an empty sentinel to simplify the code
         var myViz = this; // to prevent confusion of 'this' inside of nested functions
@@ -1715,12 +1552,6 @@ var DataVisualizer = /** @class */ (function () {
                             return; // skip type tag
                         if (!myViz.isPrimitiveType(child)) {
                             var childID = getRefID(child);
-                            // comment this out to make "linked lists" that aren't
-                            // structurally equivalent look good, e.g.,:
-                            //   x = (1, 2, (3, 4, 5, 6, (7, 8, 9, None)))
-                            //if (myViz.structurallyEquivalent(heapObj, curEntry.heap[childID])) {
-                            //  updateCurLayout(childID, curRow, newRow);
-                            //}
                             if (myViz.params.disableHeapNesting) {
                                 updateCurLayout(childID, [], []);
                             }
@@ -27081,154 +26912,22 @@ if(false) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exampleHeaderHtml = "<p>Here are some free courses that either already use Python Tutor or are good to use with it:\n</p>\n\n<p>\nedX:\n\n<a href=\"https://www.edx.org/course/python-data-science-uc-san-diegox-dse200x\">Python for Data Science</a> |\n<a href=\"https://www.edx.org/course/introduction-computer-science-mitx-6-00-1x-10\">Intro CS w/ Python (MIT)</a> |\n<a href=\"https://www.edx.org/course/introduction-computational-thinking-data-mitx-6-00-2x-5#!\">Data Science (MIT)</a> |\n<a href=\"https://www.edx.org/course/introduction-computer-science-harvardx-cs50x\">Intro CS (Harvard)</a> | <br/>\n<a href=\"https://www.edx.org/course/software-construction-java-mitx-6-005-1x\">Software Construction in Java</a> |\n<a href=\"https://www.edx.org/course/using-python-research-harvardx-ph526x\">Python for Research</a> |\n<a href=\"https://www.edx.org/course/statistics-probability-data-science-uc-san-diegox-dse210x\">Stats w/ Python</a> |\n<a href=\"https://www.edx.org/course/how-win-coding-competitions-secrets-itmox-i2cpx-0#!\">Coding Competitions</a>\n</p>\n\n<p>\nCoursera:\n\n<a href=\"https://www.coursera.org/learn/learn-to-program\">Intro CS w/ Python</a> |\n<a href=\"https://www.coursera.org/learn/python\">Intro Python</a> |\n<a href=\"https://www.coursera.org/learn/python-data-analysis\">Data Science w/ Python</a> |\n<a href=\"https://www.coursera.org/specializations/python\">Intro Python series</a><br/>\n</p>\n\n<p>\nUdacity:\n\n<a href=\"https://www.udacity.com/course/intro-to-computer-science--cs101\">Intro CS w/ Python</a> |\n<a href=\"https://www.udacity.com/course/intro-to-java-programming--cs046\">Intro Java</a> |\n<a href=\"https://www.udacity.com/course/intro-to-artificial-intelligence--cs271\">Intro A.I.</a> |\n<a href=\"https://www.udacity.com/course/design-of-computer-programs--cs212\">Design of Computer Programs</a> | <br/>\n<a href=\"https://www.udacity.com/course/javascript-basics--ud804\">JavaScript Basics</a> |\n<a href=\"https://www.udacity.com/course/technical-interview--ud513\">Technical Interview Prep</a>\n</p>\n\n<p>\nTextbooks:\n\n<a href=\"http://composingprograms.com/\">Composing Programs</a> |\n<a href=\"https://www.inferentialthinking.com/\">Computational Thinking</a> |\n<a href=\"http://interactivepython.org/runestone/static/thinkcspy/index.html\">Interactive Python</a> |\n<a href=\"http://runestoneinteractive.org/library.html\">Runestone Books</a>\n</p>\n\n<p style=\"margin-top: 35px;\">The examples below illustrate some of this tool's visualization capabilities but are <em>not</em> meant as standalone programming lessons. See the courses listed above for lessons.</p>";
-// extraneous:
-// <a href="https://www.edx.org/course/nature-code-biology-javascript-epflx-nic1-0x">Comp. Bio w/ JavaScript</a> | <br/>
-// <a href="https://www.edx.org/course/intermediate-c-microsoft-dev210-2x">Intermediate C++</a> |
-//<a href="https://www.coursera.org/specializations/data-science-python">Data Science w/ Python series</a>
-exports.pythonExamplesHtml = "<p style=\"margin-top: 25px; font-weight: bold;\">Python Examples</p>\n\n<p style=\"margin-top: 10px;\">Basic:\n\n<a class=\"exampleLink\" id=\"aliasExampleLink\" href=\"#\">hello</a> |\n<a class=\"exampleLink\" id=\"happyExampleLink\" href=\"#\">happy</a> |\n<a class=\"exampleLink\" id=\"tutorialExampleLink\" href=\"#\">intro</a> |\n<a class=\"exampleLink\" id=\"filterExampleLink\" href=\"#\">filter</a> |\n<a class=\"exampleLink\" id=\"strtokExampleLink\" href=\"#\">tokenize</a> |\n<a class=\"exampleLink\" id=\"insSortExampleLink\" href=\"#\">insertion sort</a> |\n<a class=\"exampleLink\" id=\"forElseLink\" href=\"#\">for-else</a> |\n<a class=\"exampleLink\" id=\"rawInputExampleLink\" href=\"#\">user input</a>\n</p>\n\n<p style=\"margin-top: 15px;\">Math:\n<a class=\"exampleLink\" id=\"factExampleLink\" href=\"#\">factorial</a> |\n<a class=\"exampleLink\" id=\"fibonacciExampleLink\" href=\"#\">fibonacci</a> |\n<a class=\"exampleLink\" id=\"memoFibExampleLink\" href=\"#\">memoized fibonacci</a> |\n<a class=\"exampleLink\" id=\"newtonExampleLink\" href=\"#\">square root</a> |\n<a class=\"exampleLink\" id=\"pwGcdLink\" href=\"#\">gcd</a> |\n<a class=\"exampleLink\" id=\"towersOfHanoiLink\" href=\"#\">towers of hanoi</a>\n</p>\n\n\n<p style=\"margin-top: 15px;\">Objects:\n\n<a class=\"exampleLink\" id=\"oop1ExampleLink\" href=\"#\">OOP 1</a> |\n<a class=\"exampleLink\" id=\"oop2ExampleLink\" href=\"#\">OOP 2</a> |\n<a class=\"exampleLink\" id=\"oopSmallExampleLink\" href=\"#\">OOP 3</a> |\n<a class=\"exampleLink\" id=\"inheritanceExampleLink\" href=\"#\">inheritance</a>\n\n</p>\n\n<p style=\"margin-top: 15px;\">Linked Lists:\n<a class=\"exampleLink\" id=\"ll1Link\" href=\"#\">LL 1</a> |\n<a class=\"exampleLink\" id=\"ll2Link\" href=\"#\">LL 2</a> |\n<a class=\"exampleLink\" id=\"sumListLink\" href=\"#\">LL sum</a>\n</p>\n\n<p style=\"margin-top: 15px;\">Pointer Aliasing:<br/>\n<a class=\"exampleLink\" id=\"aliasing1Link\" href=\"#\">aliasing1</a> |\n<a class=\"exampleLink\" id=\"aliasing2Link\" href=\"#\">aliasing2</a> |\n<a class=\"exampleLink\" id=\"aliasing3Link\" href=\"#\">aliasing3</a> |\n<a class=\"exampleLink\" id=\"aliasing4Link\" href=\"#\">aliasing4</a> |\n<a class=\"exampleLink\" id=\"aliasing5Link\" href=\"#\">aliasing5</a> |\n<a class=\"exampleLink\" id=\"aliasing6Link\" href=\"#\">aliasing6</a> |\n<a class=\"exampleLink\" id=\"aliasing7Link\" href=\"#\">aliasing7</a> |\n<a class=\"exampleLink\" id=\"aliasing8Link\" href=\"#\">aliasing8</a> |\n<a class=\"exampleLink\" id=\"pwSumListLink\" href=\"#\">sumList</a>\n</p>\n\n<p style=\"margin-top: 15px;\">Higher-Order Functions:<br/>\n\n<a class=\"exampleLink\" id=\"closure1Link\" href=\"#\">closure1</a> |\n<a class=\"exampleLink\" id=\"closure2Link\" href=\"#\">closure2</a> |\n<a class=\"exampleLink\" id=\"closure3Link\" href=\"#\">closure3</a> |\n<a class=\"exampleLink\" id=\"closure4Link\" href=\"#\">closure4</a> |\n<a class=\"exampleLink\" id=\"closure5Link\" href=\"#\">closure5</a> |\n<a class=\"exampleLink\" id=\"mapExampleLink\" href=\"#\">list map</a> |\n<a class=\"exampleLink\" id=\"sumExampleLink\" href=\"#\">summation</a> |\n<a class=\"exampleLink\" id=\"lambdaParamLink\" href=\"#\">lambda param</a>\n\n</p>\n\n<p style=\"margin-top: 15px;\">Advanced:<br/>\n<a class=\"exampleLink\" id=\"listCompLink\" href=\"#\">list comp</a> |\n<a class=\"exampleLink\" id=\"compsLink\" href=\"#\">list/set/dict comp</a> |\n<a class=\"exampleLink\" id=\"decoratorsLink\" href=\"#\">decorator</a> |\n<a class=\"exampleLink\" id=\"genPrimesLink\" href=\"#\">generator</a> |\n<a class=\"exampleLink\" id=\"genExprLink\" href=\"#\">genexpr</a> |\n<a class=\"exampleLink\" id=\"varargsLink\" href=\"#\">varargs</a> |\n<a class=\"exampleLink\" id=\"pwTryFinallyLink\" href=\"#\">exception</a> |\n<a class=\"exampleLink\" id=\"metaclassLink\" href=\"#\">metaclass</a>\n</p>\n\n<p style=\"margin-top: 15px;\">Python 3 only: <a class=\"exampleLink\" id=\"tortureLink\" href=\"#\">student torture</a> |\n<a class=\"exampleLink\" id=\"nonlocalLink\" href=\"#\">nonlocal</a>\n</p>";
-exports.PY2_EXAMPLES = {
-    tutorialExampleLink: "py_tutorial.txt",
-    strtokExampleLink: "strtok.txt",
-    listCompLink: "list-comp.txt",
-    compsLink: "comprehensions.txt",
-    fibonacciExampleLink: "fib.txt",
-    memoFibExampleLink: "memo_fib.txt",
-    factExampleLink: "fact.txt",
-    filterExampleLink: "filter.txt",
-    insSortExampleLink: "ins_sort.txt",
-    aliasExampleLink: "aliasing.txt",
-    happyExampleLink: "happy.txt",
-    newtonExampleLink: "sqrt.txt",
-    oopSmallExampleLink: "oop_small.txt",
-    mapExampleLink: "map.txt",
-    rawInputExampleLink: "raw_input.txt",
-    oop1ExampleLink: "oop_1.txt",
-    oop2ExampleLink: "oop_2.txt",
-    inheritanceExampleLink: "oop_inherit.txt",
-    sumExampleLink: "sum.txt",
-    pwGcdLink: "wentworth_gcd.txt",
-    pwSumListLink: "wentworth_sumList.txt",
-    towersOfHanoiLink: "towers_of_hanoi.txt",
-    pwTryFinallyLink: "wentworth_try_finally.txt",
-    sumCubesLink: "sum-cubes.txt",
-    decoratorsLink: "decorators.txt",
-    genPrimesLink: "gen_primes.txt",
-    genExprLink: "genexpr.txt",
-    closure1Link: "closures/closure1.txt",
-    closure2Link: "closures/closure2.txt",
-    closure3Link: "closures/closure3.txt",
-    closure4Link: "closures/closure4.txt",
-    closure5Link: "closures/closure5.txt",
-    lambdaParamLink: "closures/lambda-param.txt",
-    aliasing1Link: "aliasing/aliasing1.txt",
-    aliasing2Link: "aliasing/aliasing2.txt",
-    aliasing3Link: "aliasing/aliasing3.txt",
-    aliasing4Link: "aliasing/aliasing4.txt",
-    aliasing5Link: "aliasing/aliasing5.txt",
-    aliasing6Link: "aliasing/aliasing6.txt",
-    aliasing7Link: "aliasing/aliasing7.txt",
-    aliasing8Link: "aliasing/aliasing8.txt",
-    ll1Link: "linked-lists/ll1.txt",
-    ll2Link: "linked-lists/ll2.txt",
-    sumListLink: "sum-list.txt",
-    varargsLink: "varargs.txt",
-    forElseLink: "for-else.txt",
-    metaclassLink: "metaclass.txt",
-};
-exports.PY3_EXAMPLES = {
-    tortureLink: "closures/student-torture.txt",
-    nonlocalLink: "nonlocal.txt",
-};
-exports.javaExamplesHtml = "<p style=\"margin-top: 25px; font-weight: bold;\">Java Examples</p>\n\n<p>\nBasic:\n<a class=\"exampleLink\" id=\"javaVarLink\" href=\"#\">Variables</a> |\n<a class=\"exampleLink\" id=\"javaCFLink\" href=\"#\">ControlFlow</a> |\n<a class=\"exampleLink\" id=\"javaSqrtLink\" href=\"#\">Sqrt</a> |\n<a class=\"exampleLink\" id=\"javaExecLimitLink\" href=\"#\">ExecLimit</a> |\n<a class=\"exampleLink\" id=\"javaStringsLink\" href=\"#\">Strings</a>\n</p>\n\n<p>\nMethods:\n<a class=\"exampleLink\" id=\"javaPassByValLink\" href=\"#\">PassByValue</a> |\n<a class=\"exampleLink\" id=\"javaRecurLink\" href=\"#\">Recursion</a> |\n<a class=\"exampleLink\" id=\"javaSOLink\" href=\"#\">StackOverflow</a>\n</p>\n\n<p>\nOOP:\n<a class=\"exampleLink\" id=\"javaRolexLink\" href=\"#\">Rolex</a> |\n<a class=\"exampleLink\" id=\"javaPersonLink\" href=\"#\">Person</a> |\n<a class=\"exampleLink\" id=\"javaComplexLink\" href=\"#\">Complex</a> |\n<a class=\"exampleLink\" id=\"javaCastingLink\" href=\"#\">Casting</a>\n</p>\n\n<p>\nData structures:\n<a class=\"exampleLink\" id=\"javaLLLink\" href=\"#\">LinkedList</a> |\n<a class=\"exampleLink\" id=\"javaStackQueueLink\" href=\"#\">StackQueue</a> |\n<a class=\"exampleLink\" id=\"javaPostfixLink\" href=\"#\">Postfix</a> |\n<a class=\"exampleLink\" id=\"javaSTLink\" href=\"#\">SymbolTable</a>\n</p>\n\n<p>\nJava features:\n<a class=\"exampleLink\" id=\"javaToStringLink\" href=\"#\">ToString</a> |\n<a class=\"exampleLink\" id=\"javaReflectLink\" href=\"#\">Reflect</a> |\n<a class=\"exampleLink\" id=\"javaExceptionLink\" href=\"#\">Exception</a> |\n<a class=\"exampleLink\" id=\"javaExceptionFlowLink\" href=\"#\">ExceptionFlow</a> |\n<a class=\"exampleLink\" id=\"javaTwoClassesLink\" href=\"#\">TwoClasses</a>\n</p>\n\n<p>\nMisc:\n<a class=\"exampleLink\" id=\"javaForestLink\" href=\"#\">Forest</a> |\n<a class=\"exampleLink\" id=\"javaKnapsackLink\" href=\"#\">Knapsack</a> |\n<a class=\"exampleLink\" id=\"javaStaticInitLink\" href=\"#\">StaticInitializer</a> |\n<a class=\"exampleLink\" id=\"javaSyntheticLink\" href=\"#\">Synthetic</a>\n</p>\n\n<p style=\"margin-top: 5px;\">(All Java examples created by <a href=\"https://github.com/daveagp\">David Pritchard</a>)</p>";
-exports.JAVA_EXAMPLES = {
-    javaVarLink: 'Variables.java',
-    javaCFLink: 'ControlFlow.java',
-    javaSqrtLink: 'Sqrt.java',
-    javaExecLimitLink: 'ExecLimit.java',
-    javaStringsLink: 'Strings.java',
-    javaPassByValLink: 'PassByValue.java',
-    javaRecurLink: 'Recursion.java',
-    javaSOLink: 'StackOverflow.java',
-    javaRolexLink: 'Rolex.java',
-    javaPersonLink: 'Person.java',
-    javaComplexLink: 'Complex.java',
-    javaCastingLink: 'Casting.java',
-    javaLLLink: 'LinkedList.java',
-    javaStackQueueLink: 'StackQueue.java',
-    javaPostfixLink: 'Postfix.java',
-    javaSTLink: 'SymbolTable.java',
-    javaToStringLink: 'ToString.java',
-    javaReflectLink: 'Reflect.java',
-    javaExceptionLink: 'Exception.java',
-    javaExceptionFlowLink: 'ExceptionFlow.java',
-    javaTwoClassesLink: 'TwoClasses.java',
-    javaForestLink: 'Forest.java',
-    javaKnapsackLink: 'Knapsack.java',
-    javaStaticInitLink: 'StaticInitializer.java',
-    javaSyntheticLink: 'Synthetic.java',
-};
-exports.jsExamplesHtml = "<p style=\"margin-top: 25px; font-weight: bold;\">JavaScript Examples</p>\n\n<p style=\"margin-top: 5px;\">\n  <a class=\"exampleLink\" id=\"jsFactExLink\" href=\"#\">factorial</a> |\n  <a class=\"exampleLink\" id=\"jsDatatypesExLink\" href=\"#\">data types</a> |\n  <a class=\"exampleLink\" id=\"jsExceptionExLink\" href=\"#\">exception</a> |\n  <a class=\"exampleLink\" id=\"jsClosureExLink\" href=\"#\">closure</a> |\n  <a class=\"exampleLink\" id=\"jsShadowingExLink\" href=\"#\">shadowing</a> |\n  <a class=\"exampleLink\" id=\"jsConstructorExLink\" href=\"#\">constructor</a> |\n  <a class=\"exampleLink\" id=\"jsInhExLink\" href=\"#\">inheritance</a>\n</p>";
-exports.JS_EXAMPLES = {
-    jsFactExLink: 'fact.js',
-    jsDatatypesExLink: 'data-types.js',
-    jsExceptionExLink: 'caught-exception.js',
-    jsClosureExLink: 'closure1.js',
-    jsShadowingExLink: 'var-shadowing2.js',
-    jsConstructorExLink: 'constructor.js',
-    jsInhExLink: 'inheritance.js',
-};
-exports.tsExamplesHtml = "<p style=\"margin-top: 25px; font-weight: bold;\">TypeScript Examples</p>\n\n<p style=\"margin-top: 5px;\">\n  <a class=\"exampleLink\" id=\"tsHelloExLink\" href=\"#\">hello</a> |\n  <a class=\"exampleLink\" id=\"tsGreeterExLink\" href=\"#\">classes</a> |\n  <a class=\"exampleLink\" id=\"tsInheritanceExLink\" href=\"#\">inheritance</a> |\n  <a class=\"exampleLink\" id=\"tsGreeterGenericsExLink\" href=\"#\">generics</a>\n</p>";
-exports.TS_EXAMPLES = {
-    tsHelloExLink: 'hello.ts',
-    tsGreeterExLink: 'greeter.ts',
-    tsGreeterGenericsExLink: 'greeter-generics.ts',
-    tsInheritanceExLink: 'inheritance.ts',
-};
-exports.rubyExamplesHtml = "<p style=\"margin-top: 25px; font-weight: bold;\">Ruby Examples</p>\n\n<p style=\"margin-top: 5px;\">\n  <a class=\"exampleLink\" id=\"rubyContainersLink\" href=\"#\">Containers</a> |\n  <a class=\"exampleLink\" id=\"rubyGlobalsLink\" href=\"#\">Globals</a> |\n  <a class=\"exampleLink\" id=\"rubyConstantsLink\" href=\"#\">Constants</a> |\n  <a class=\"exampleLink\" id=\"rubyBlocksLink\" href=\"#\">Blocks</a> |\n  <a class=\"exampleLink\" id=\"rubyBlocksScopingLink\" href=\"#\">Block scoping</a> |\n  <a class=\"exampleLink\" id=\"rubyBlocksScoping3Link\" href=\"#\">More block scoping</a>\n  <p/>\n  <a class=\"exampleLink\" id=\"rubyProcLink\" href=\"#\">Proc & Lambda</a> |\n  <a class=\"exampleLink\" id=\"rubyProcScopingLink\" href=\"#\">Proc scoping</a> |\n  <a class=\"exampleLink\" id=\"rubyProcReturnLink\" href=\"#\">Proc return</a> |\n  <a class=\"exampleLink\" id=\"rubyLambdaScopingLink\" href=\"#\">Lambda scoping</a> |\n  <a class=\"exampleLink\" id=\"rubyInheritanceLink\" href=\"#\">Inheritance</a> |\n  <a class=\"exampleLink\" id=\"rubySymbolsLink\" href=\"#\">Symbols</a>\n  <p/>\n  <a class=\"exampleLink\" id=\"rubyPrivateProtectedLink\" href=\"#\">Protected & private</a> |\n  <a class=\"exampleLink\" id=\"rubyInstClassVarsComplexLink\" href=\"#\">Class & instance vars</a> |\n  <a class=\"exampleLink\" id=\"rubyToplevelLink\" href=\"#\">Toplevel defs</a> |\n  <a class=\"exampleLink\" id=\"rubyMegagreeterLink\" href=\"#\">Megagreeter</a>\n</p>";
-exports.RUBY_EXAMPLES = {
-    rubyBlocksLink: 'blocks-basic.rb',
-    rubyBlocksScopingLink: 'blocks-scoping-2.rb',
-    rubyInheritanceLink: 'class-inheritance.rb',
-    rubyConstantsLink: 'constants-4.rb',
-    rubyContainersLink: 'container-data-types.rb',
-    rubyGlobalsLink: 'globals.rb',
-    rubyLambdaScopingLink: 'lambda-scoping-2.rb',
-    rubyMegagreeterLink: 'megagreeter.rb',
-    rubyProcLink: 'proc-basic.rb',
-    rubyProcScopingLink: 'proc-scoping.rb',
-    rubySymbolsLink: 'symbols.rb',
-    rubyPrivateProtectedLink: 'class-private-protected.rb',
-    rubyInstClassVarsComplexLink: 'inst-class-vars-complex.rb',
-    rubyToplevelLink: 'toplevel-inst-class-vars.rb',
-    rubyBlocksScoping3Link: 'blocks-scoping-3.rb',
-    rubyProcReturnLink: 'proc-return.rb',
-};
-exports.cExamplesHtml = "<p style=\"margin-top: 25px; font-weight: bold;\">C Examples</p>\n\n<p style=\"margin-top: 5px;\">\n  <a class=\"exampleLink\" id=\"cMengThesisLink\" href=\"#\">Thesis</a> |\n  <a class=\"exampleLink\" id=\"cGlobalsLink\" href=\"#\">Globals</a> |\n  <a class=\"exampleLink\" id=\"cStructLink\" href=\"#\">Structs</a> |\n  <a class=\"exampleLink\" id=\"cNestedStructLink\" href=\"#\">Nested structs</a> |\n  <a class=\"exampleLink\" id=\"cArrOverflowLink\" href=\"#\">Array overflow</a> |\n  <a class=\"exampleLink\" id=\"cArrParamLink\" href=\"#\">Array param</a>\n  <p/>\n  <a class=\"exampleLink\" id=\"cStringRevLink\" href=\"#\">String reverse</a> |\n  <a class=\"exampleLink\" id=\"cPtrLevelsLink\" href=\"#\">Pointer levels</a> |\n  <a class=\"exampleLink\" id=\"cPtrChainLink\" href=\"#\">Pointer chain</a> |\n  <a class=\"exampleLink\" id=\"cPtrWildLink\" href=\"#\">Pointers wild</a> |\n  <a class=\"exampleLink\" id=\"cTypedefLink\" href=\"#\">Typedef</a>\n</p>";
-exports.C_EXAMPLES = {
-    cArrOverflowLink: 'array-overflow.c',
-    cArrParamLink: 'array-param.c',
-    cNestedStructLink: 'fjalar-NestedStructTest.c',
-    cPtrLevelsLink: 'fjalar-pointer-levels.c',
-    //cStringArraysLink: 'fjalar-string-arrays.c',
-    cGlobalsLink: 'globals.c',
-    cMengThesisLink: 'meng-thesis-example.c',
-    cPtrChainLink: 'pointer-chain.c',
-    cPtrWildLink: 'pointers-gone-wild.c',
-    cStringRevLink: 'string-reverse-inplace.c',
-    cStructLink: 'struct-basic.c',
-    cTypedefLink: 'typedef-test.c',
-};
-exports.cppExamplesHtml = "<p style=\"margin-top: 25px; font-weight: bold;\">C++ Examples</p>\n\n<p style=\"margin-top: 5px;\">\n  <a class=\"exampleLink\" id=\"cppFirstLink\" href=\"#\">Basic</a> |\n  <a class=\"exampleLink\" id=\"cppPassRefLink\" href=\"#\">Pass by ref</a> |\n  <a class=\"exampleLink\" id=\"cppClassLink\" href=\"#\">Class</a> |\n  <a class=\"exampleLink\" id=\"cppClassPtrLink\" href=\"#\">Class pointer</a> |\n  <a class=\"exampleLink\" id=\"cppDateLink\" href=\"#\">Date class</a> |\n  <a class=\"exampleLink\" id=\"cppInheritLink\" href=\"#\">Inheritance</a> |\n  <a class=\"exampleLink\" id=\"cppVirtualLink\" href=\"#\">Virtual method</a>\n</p>";
-exports.CPP_EXAMPLES = {
-    cppClassLink: 'cpp-class-basic.cpp',
-    cppDateLink: 'cpp-class-date.cpp',
-    cppClassPtrLink: 'cpp-class-pointers.cpp',
-    cppFirstLink: 'cpp-first.cpp',
-    cppInheritLink: 'cpp-inheritance.cpp',
-    cppPassRefLink: 'cpp-pass-by-ref.cpp',
-    cppVirtualLink: 'cpp-virtual-method.cpp',
-};
+exports.exampleHeaderHtml = '';
+exports.pythonExamplesHtml = '';
+exports.PY2_EXAMPLES = '';
+exports.PY3_EXAMPLES = '';
+exports.javaExamplesHtml = '';
+exports.JAVA_EXAMPLES = '';
+exports.jsExamplesHtml = '';
+exports.JS_EXAMPLES = '';
+exports.tsExamplesHtml = '';
+exports.TS_EXAMPLES = '';
+exports.RUBY_EXAMPLES = '';
+exports.rubyExamplesHtml = '';
+exports.cExamplesHtml = '';
+exports.C_EXAMPLES = '';
+exports.CPP_EXAMPLES = '';
+exports.cppExamplesHtml = '';
 
 
 /***/ }),
@@ -27472,9 +27171,6 @@ module.exports = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QCARXhpZgA
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -27615,11 +27311,7 @@ var OptFrontendWithTestcases = /** @class */ (function (_super) {
         };
         this.executeCodeAndRunCallback(codeToExec, $('#pythonVersionSelector').val(), backendOptionsObj, frontendOptionsObj, runTestCaseCallback.bind(this));
     };
-    // TODO: properly handle and display errors when there's a syntax
-    // error ... right now it displays as a syntax error in the main pane,
-    // which can be confusing
     OptFrontendWithTestcases.prototype.vizTestCase = function (id, codeToExec, firstTestLine) {
-        // adapted from executeCode in opt-frontend.js
         var backendOptionsObj = this.getBaseBackendOptionsObj();
         var frontendOptionsObj = this.getBaseFrontendOptionsObj();
         backendOptionsObj.viz_test_case = true; // just so we can see this in server logs
@@ -27668,9 +27360,6 @@ var OptFrontendWithTestcases = /** @class */ (function (_super) {
                 var myArgs = that.getAppState();
                 var buttonPrompt = $(this).html();
                 var res = prompt(surveys_1.eureka_prompt);
-                // don't do ajax call when Cancel button is pressed
-                // (note that if OK button is pressed with no response, then an
-                // empty string will still be sent to the server)
                 if (res !== null) {
                     myArgs.surveyVersion = surveys_1.eureka_survey_version;
                     myArgs.surveyQuestion = buttonPrompt;
@@ -27682,12 +27371,6 @@ var OptFrontendWithTestcases = /** @class */ (function (_super) {
             });
         }
     };
-    // called whenever myVisualizer.updateOutput() is called to update the visualization;
-    // set prevExecutionRuntimeErrorMsg / line / code if the user has stepped to a trace
-    // entry that contains an error message. the rationale for doing this
-    // is that we want to display only errors that the user has stepped to
-    // and seen with their own eyes so that they can hopefully know what the
-    // error message is referring to ...
     OptFrontendWithTestcases.prototype.updateOutputCallbackFunc = function () {
         _super.prototype.updateOutputCallbackFunc.call(this);
         if (this.myVisualizer) {
@@ -27699,11 +27382,9 @@ var OptFrontendWithTestcases = /** @class */ (function (_super) {
             }
         }
     };
-    // created on 2015-04-18
     OptFrontendWithTestcases.prototype.experimentalPopUpSyntaxErrorSurvey = function () {
         var _this = this;
         if (this.prevExecutionExceptionObjLst.length > 0) {
-            // work with the most recent entry
             var prevExecutionExceptionObj = this.prevExecutionExceptionObjLst[this.prevExecutionExceptionObjLst.length - 1];
             var offendingLine = prevExecutionExceptionObj.killerException.line;
             if (offendingLine === undefined) {

@@ -20,7 +20,7 @@ if(isset($_SESSION['u_username']))
         {
           $sql="DELETE FROM code WHERE id='$id' AND username='$user'";
           @mysqli_query($conn,$sql);
-          $file_path='/opt/lampp/htdocs/project/vis/OnlinePythonTutor-master/v5-unity/uploads/'.$user.'/'.$file.'.c';
+          $file_path='/opt/lampp/htdocs/project/visualizer/uploads/'.$user.'/'.$file.'.c';
           @unlink($file_path);
           header("Location: ../files/");
           exit();

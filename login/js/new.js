@@ -55,7 +55,7 @@ $(document).ready(function(){
                   $('#snackbar').addClass("show");
                   setTimeout(function(){ $('#snackbar').removeClass("show");}, 3000);
                 } else {
-                  window.location = "http://localhost/project/vis/OnlinePythonTutor-master/v5-unity/";
+                  window.location = "http://localhost/project/visualizer/";
                 }
             }
 
@@ -106,7 +106,7 @@ $(document).ready(function(){
             if(status=="success")
             {
 
-                window.location = "http://localhost/project/vis/OnlinePythonTutor-master/v5-unity/";
+                window.location = "http://localhost/project/visualizer/";
             }
 
           });
@@ -132,7 +132,7 @@ $(document).ready(function(){
 
 
               window.open(
-                'http://localhost/project/vis/OnlinePythonTutor-master/v5-unity/files/',
+                'http://localhost/project/visualizer/files/',
                 '_blank' // <- This is what makes it open in a new window.
               );
 
@@ -141,6 +141,35 @@ $(document).ready(function(){
           });
     });
 });
+
+$(document).ready(function(){
+
+    $("#pro_btn").click(function(){
+
+        var submit = 'submit';
+
+      $.post("files/index.php",
+       {
+         submit:submit,
+       },
+
+      function(data,status){
+
+            if(status=="success")
+            {
+
+
+              window.open(
+                'http://localhost/project/visualizer/problems/',
+                '_blank' // <- This is what makes it open in a new window.
+              );
+
+             }
+
+          });
+    });
+});
+
 
 
 

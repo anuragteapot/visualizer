@@ -16,7 +16,7 @@ if (isset($_GET['file']) && basename($_GET['file']) == $_GET['file']) {
 
 if ($filename) {
 	// define the path to your download folder plus assign the file name
-	$path = '/opt/lampp/htdocs/project/vis/OnlinePythonTutor-master/v5-unity/uploads/'.$user.'/'.$filename;
+	$path = '/opt/lampp/htdocs/project/visualizer/uploads/'.$user.'/'.$filename;
 	// check that file exists and is readable
 	if (file_exists($path) && is_readable($path)) {
 		// get the file size and send the http headers

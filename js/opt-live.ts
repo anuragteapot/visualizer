@@ -1,38 +1,3 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
-
-
-// OPT live programming prototype started on 2016-05-30
-// first launched as a "Live Programming Mode" button on main OPT site
-// on 2016-06-08, working for Python 2/3 and JavaScript for starters
-//
-// ... inspired by my explorations with IPython shell + OPT for REPL
-// visualizations in August 2013 (opt-ipy.py), and Irene Chen's holistic
-// visualizations (2013-2014 UROP), inspired by Bret Victor's stuff
-
-/* TODOs:
-
-- abstract out components within pytutor.js to prevent ugly code
-  duplication with stuff in this file
-
-- if these Ace enhancements look good, then I can also use them for
-  Codeopticon as well!
-
-- [later] add a codeopticon-style history slider of the user's past
-  edits (but that might be confusing)
-
-- [later] detect exact position of syntax error and put a squiggly line below
-  it with something like:
-
-  File "<string>", line 1
-    x~=1
-     ^
-
-  (do this for the OPT classic editor too. and for other language backends)
-
-*/
-
 require('../css/opt-frontend.css');
 require('../css/opt-live.css');
 

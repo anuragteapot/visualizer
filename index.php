@@ -30,6 +30,7 @@ if(isset($_SESSION['u_username'])) {
 		<div id="save" ></div><input id="save-file" type="text" placeholder="File-name" value="<?php  if(isset($_SESSION['save-file'])) { echo $_SESSION['save-file']; } ?>"/>
 		<div id="logout" ><button id="logout_btn">Logout</button></div>
 		<div id="files" ><button id="files_btn" >My Files</button></div>
+		<div id="pro" ><button id="pro_btn" >Problems</button></div>
 	<?php
 		echo '<div id="user" ><p id="user_txt">Hi '.$_SESSION['u_name'].'</p></div>';
 	}
@@ -336,9 +337,6 @@ if(isset($_SESSION['u_username'])) {
 					if(e.keyCode === 39) {
 						$('#jmpStepFwd').trigger('click');
 					}
-
-
-
 				});
 
 			</script>

@@ -3110,13 +3110,13 @@
     text-align: center;
 	}
 
-	#progOutputs{
+	#progOutputs {
 		visibility: hidden;
 		position: absolute;
 	}
 
 
-	#header_input{
+	#header_input {
 		background-color: #4686a0;
 		color: rgba(255, 255, 255, 0.75);
 		background-image: url("images/overlay2.png"), url("images/overlay3.svg"), linear-gradient(45deg, #9dc66b 5%, #4fa49a 30%, #4361c2);
@@ -3229,11 +3229,28 @@
 		z-index: 10;
 	}
 
+	#pro{
+		position: absolute;
+		top:20px;
+		right:350px;
+		color: white;
+		z-index: 10;
+	}
+
+
+
 	#files_btn{
 		color: white!important;
 		background-color:#2f889a;
 		border-radius: 50px;
 	}
+
+	#pro_btn{
+		color: white!important;
+		background-color:#2f889a;
+		border-radius: 50px;
+	}
+
 
 /*snakbar*/
 	#snackbar {

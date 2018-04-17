@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html >
+	<head>
+		<title>Visualizer</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/HoldOn.css">
+</head>
+
+<body>
+
+<div id="container">
+  <header>
+    <h1>Codeforces Problems</h1>
+    <button id="btn" class=".btn-primary">Get Problems</button>
+<div id="select-main">
+    <div id="select">
+      <select id="num">
+        <option value="0">Default</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="150">150</option>
+        <option value="200">200</option>
+      </select>
+    </div>
+
+    <div id="select">
+      <select id="type">
+        <option value="0">Default</option>
+        <option value="2000">Easy</option>
+        <option value="2000">Medium</option>
+        <option value="500">Hard</option>
+      </select>
+    </div>
+
+    <div id="select">
+      <select id="tags">
+        <option value="0">Default</option>
+        <option value="implementation">Implementation</option>
+        <option value="brute force">Brute force</option>
+        <option value="greedy">Greedy</option>
+        <option value="bitmasks">Bitmasks</option>
+        <option value="data structures">Data structures</option>
+        <option value="constructive algorithms">Constructive algorithms</option>
+        <option value="dp">Dp</option>
+        <option value="binary search">Binary search</option>
+        <option value="graphs">Graphs</option>
+        <option value="geometry">geometry</option>
+        <option value="*special">*Special</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+  <h2>Table</h2>
+  <div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>ContextId</th>
+        <th>Problem Name</th>
+        <th>Solve Count</th>
+        <th>Tags</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="set">
+    </tbody>
+  </table>
+  </div>
+</div>
+
+</body>
+
+<script type="text/javascript" src="js/main.js" ></script>
+<script type="text/javascript" src="js/sha512.js"></script>
+<script type="text/javascript" src="js/HoldOn.js"></script>
+
+</html>

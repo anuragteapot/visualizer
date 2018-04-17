@@ -586,56 +586,26 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAADwCAMAAADY
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, jQuery) {
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
 Object.defineProperty(exports, "__esModule", { value: true });
-/* TODO:
-
-- substitute in a non-live version of the live editor from opt-live.js
-  in addition to the janky current version of the editor
-
-*/
-/* pytutor coding gotchas:
-
-- *NEVER* use raw $(__) or d3.select(__) statements to select DOM elements.
-
-  *ALWAYS* use myViz.domRoot or myViz.domRootD3 for jQuery and D3, respectively.
-
-  Otherwise things will break in weird ways when you have more than one
-  visualization embedded within a webpage, due to multiple matches in
-  the global namespace.
-
-- always use generateID and generateHeapObjID to generate unique CSS
-  IDs, or else things will break when multiple ExecutionVisualizer
-  instances are on a webpage
-
-*/
 __webpack_require__(8);
 __webpack_require__(0);
-__webpack_require__(11); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR
+__webpack_require__(11);
 __webpack_require__(9);
 __webpack_require__(15);
-__webpack_require__(10); // contains slight pgbovine modifications
+__webpack_require__(10);
 __webpack_require__(14);
 exports.SVG_ARROW_POLYGON = '0,3 12,3 12,0 18,5 12,10 12,7 0,7';
-var SVG_ARROW_HEIGHT = 10; // must match height of SVG_ARROW_POLYGON
-/* colors - see pytutor.css for more colors */
+var SVG_ARROW_HEIGHT = 10;
 exports.brightRed = '#e93f34';
 var connectorBaseColor = '#e93f34';
 var connectorHighlightColor = exports.brightRed;
 var connectorInactiveColor = '#cccccc';
 var errorColor = exports.brightRed;
 var breakpointColor = exports.brightRed;
-// Unicode arrow types: '\u21d2', '\u21f0', '\u2907'
 exports.darkArrowColor = exports.brightRed;
 exports.lightArrowColor = '#e93f34';
 var heapPtrSrcRE = /__heap_pointer_src_/;
-var rightwardNudgeHack = true; // suggested by John DeNero, toggle with global
-// returns a list of length a.length * b.length with elements from both
-// mixed. the elements of a and b should be primitives, but if the first element
-// is a list, it flattens it. e.g.,:
-//   multiplyLists([1, 2, 3], [4, 5]) -> [[1,4], [1,5], [2,4], [2,5], [3,4], [3,5]]
+var rightwardNudgeHack = true;
 function multiplyLists(a, b) {
     var ret = [];
     for (var i = 0; i < a.length; i++) {
@@ -654,58 +624,8 @@ function multiplyLists(a, b) {
 }
 // the main event!
 var ExecutionVisualizer = /** @class */ (function () {
-    // Constructor with an ever-growing feature-crepped list of options :)
-    // domRootID is the string ID of the root element where to render this instance
-    //
-    // dat is data returned by the Python Tutor backend consisting of two fields:
-    //   code  - string of executed code
-    //   trace - a full execution trace
-    //
-    // params is an object containing optional parameters, such as:
-    //   jumpToEnd - if non-null, jump to the very end of execution if
-    //               there's no error, or if there's an error, jump to the
-    //               FIRST ENTRY with an error
-    //   startingInstruction - the (zero-indexed) execution point to display upon rendering
-    //                         if this is set, then it *overrides* jumpToEnd
-    //   codeDivHeight - maximum height of #pyCodeOutputDiv (in integer pixels)
-    //   codeDivWidth  - maximum width  of #pyCodeOutputDiv (in integer pixels)
-    //   editCodeBaseURL - the base URL to visit when the user clicks 'Edit code' (if null, then 'Edit code' link hidden)
-    //   embeddedMode         - shortcut for codeDivWidth=DEFAULT_EMBEDDED_CODE_DIV_WIDTH,
-    //                                       codeDivHeight=DEFAULT_EMBEDDED_CODE_DIV_HEIGHT
-    //                          (and hide a bunch of other stuff & don't activate keyboard shortcuts!)
-    //   disableHeapNesting   - if true, then render all heap objects at the top level (i.e., no nested objects)
-    //   drawParentPointers   - if true, then draw environment diagram parent pointers for all frames
-    //                          WARNING: there are hard-to-debug MEMORY LEAKS associated with activating this option
-    //   textualMemoryLabels  - render references using textual memory labels rather than as jsPlumb arrows.
-    //                          this is good for slow browsers or when used with disableHeapNesting
-    //                          to prevent "arrow overload"
-    //   updateOutputCallback - function to call (with 'this' as parameter)
-    //                          whenever this.updateOutput() is called
-    //                          (BEFORE rendering the output display)
-    //   heightChangeCallback - function to call (with 'this' as parameter)
-    //                          whenever the HEIGHT of #dataViz changes
-    //   verticalStack - if true, then stack code display ON TOP of visualization
-    //                   (else place side-by-side)
-    //   visualizerIdOverride - override visualizer ID instead of auto-assigning it
-    //                          (BE CAREFUL ABOUT NOT HAVING DUPLICATE IDs ON THE SAME PAGE,
-    //                           OR ELSE ARROWS AND OTHER STUFF WILL GO HAYWIRE!)
-    //   executeCodeWithRawInputFunc - function to call when you want to re-execute the given program
-    //                                 with some new user input (somewhat hacky!)
-    //   compactFuncLabels - render functions with a 'func' prefix and no type label
-    //   showAllFrameLabels - display frame and parent frame labels for all functions (default: false)
-    //   hideCode - hide the code display and show only the data structure viz
-    //   lang - to render labels in a style appropriate for other languages,
-    //          and to display the proper language in langDisplayDiv:
-    //          'py2' for Python 2, 'py3' for Python 3, 'js' for JavaScript, 'java' for Java,
-    //          'ts' for TypeScript, 'ruby' for Ruby, 'c' for C, 'cpp' for C++
-    //          [default is Python-style labels]
     function ExecutionVisualizer(domRootID, dat, params) {
         this.params = {};
-        // an array of objects with the following fields:
-        //   'text' - the text of the line of code
-        //   'lineNumber' - one-indexed (always the array index + 1)
-        //   'executionPoints' - an ordered array of zero-indexed execution points where this line was executed
-        //   'breakpointHere' - has a breakpoint been set here?
         this.codeOutputLines = [];
         this.curInstr = 0;
         // API for adding a hook, created by David Pritchard
@@ -800,60 +720,12 @@ var ExecutionVisualizer = /** @class */ (function () {
         this.try_hook("end_constructor", { myViz: this });
         this.render(); // go for it!
     }
-    /* API for adding a hook, created by David Pritchard
-       https://github.com/daveagp
-  
-      [this documentation is a bit deprecated since Philip made try_hook a
-       method of ExecutionVisualizer, but the general ideas remain]
-  
-     An external user should call
-       add_pytutor_hook("hook_name_here", function(args) {...})
-     args will be a javascript object with several named properties;
-     this is meant to be similar to Python's keyword arguments.
-  
-     The hooked function should return an array whose first element is a boolean:
-     true if it completely handled the situation (no further hooks
-     nor the base function should be called); false otherwise (wasn't handled).
-     If the hook semantically represents a function that returns something,
-     the second value of the returned array is that semantic return value.
-  
-     E.g. for the Java visualizer a simplified version of a hook we use is:
-  
-    add_pytutor_hook(
-      "isPrimitiveType",
-      function(args) {
-        var obj = args.obj; // unpack
-        if (obj instanceof Array && obj[0] == "CHAR-LITERAL")
-          return [true, true]; // yes we handled it, yes it's primitive
-        return [false]; // didn't handle it, let someone else
-      });
-  
-     Hook callbacks can return false or undefined (i.e. no return
-     value) in lieu of [false].
-  
-     NB: If multiple functions are added to a hook, the oldest goes first. */
     ExecutionVisualizer.prototype.add_pytutor_hook = function (hook_name, func) {
         if (this.pytutor_hooks[hook_name])
             this.pytutor_hooks[hook_name].push(func);
         else
             this.pytutor_hooks[hook_name] = [func];
     };
-    /*  [this documentation is a bit deprecated since Philip made try_hook a
-         method of ExecutionVisualizer, but the general ideas remain]
-  
-    try_hook(hook_name, args): how the internal codebase invokes a hook.
-  
-    args will be a javascript object with several named properties;
-    this is meant to be similar to Python's keyword arguments. E.g.,
-  
-    function isPrimitiveType(obj) {
-      var hook_result = try_hook("isPrimitiveType", {obj:obj});
-      if (hook_result[0]) return hook_result[1];
-      // go on as normal if the hook didn't handle it
-  
-    Although add_pytutor_hook allows the hooked function to
-    return false or undefined, try_hook will always return
-    something with the strict format [false], [true] or [true, ...]. */
     ExecutionVisualizer.prototype.try_hook = function (hook_name, args) {
         if (this.pytutor_hooks[hook_name]) {
             for (var i = 0; i < this.pytutor_hooks[hook_name].length; i++) {
@@ -905,8 +777,6 @@ var ExecutionVisualizer = /** @class */ (function () {
             if (this.params.codeDivHeight === undefined) {
                 this.params.codeDivHeight = ExecutionVisualizer.DEFAULT_EMBEDDED_CODE_DIV_HEIGHT;
             }
-            // add an extra label to link back to the main site, so that viewers
-            // on the embedded page know that they're seeing an OPT visualization
             base.find('#codeFooterDocs').hide(); // cut out extraneous docs
         }
         // not enough room for these extra buttons ...
@@ -1629,40 +1499,7 @@ var DataVisualizer = /** @class */ (function () {
             renderedHeapObjectIDs: d3.map(),
         };
     };
-    // this method initializes curTraceLayouts
-    //
-    // Pre-compute the layout of top-level heap objects for ALL execution
-    // points as soon as a trace is first loaded. The reason why we want to
-    // do this is so that when the user steps through execution points, the
-    // heap objects don't "jiggle around" (i.e., preserving positional
-    // invariance). Also, if we set up the layout objects properly, then we
-    // can take full advantage of d3 to perform rendering and transitions.
     DataVisualizer.prototype.precomputeCurTraceLayouts = function () {
-        // curTraceLayouts is a list of top-level heap layout "objects" with the
-        // same length as curTrace after it's been fully initialized. Each
-        // element of curTraceLayouts is computed from the contents of its
-        // immediate predecessor, thus ensuring that objects don't "jiggle
-        // around" between consecutive execution points.
-        //
-        // Each top-level heap layout "object" is itself a LIST of LISTS of
-        // object IDs, where each element of the outer list represents a row,
-        // and each element of the inner list represents columns within a
-        // particular row. Each row can have a different number of columns. Most
-        // rows have exactly ONE column (representing ONE object ID), but rows
-        // containing 1-D linked data structures have multiple columns. Each
-        // inner list element looks something like ['row1', 3, 2, 1] where the
-        // first element is a unique row ID tag, which is used as a key for d3 to
-        // preserve "object constancy" for updates, transitions, etc. The row ID
-        // is derived from the FIRST object ID inserted into the row. Since all
-        // object IDs are unique, all row IDs will also be unique.
-        /* This is a good, simple example to test whether objects "jiggle"
-    
-        x = [1, [2, [3, None]]]
-        y = [4, [5, [6, None]]]
-    
-        x[1][1] = y[1]
-    
-        */
         this.curTraceLayouts = [];
         this.curTraceLayouts.push([]); // pre-seed with an empty sentinel to simplify the code
         var myViz = this; // to prevent confusion of 'this' inside of nested functions
@@ -1715,12 +1552,6 @@ var DataVisualizer = /** @class */ (function () {
                             return; // skip type tag
                         if (!myViz.isPrimitiveType(child)) {
                             var childID = getRefID(child);
-                            // comment this out to make "linked lists" that aren't
-                            // structurally equivalent look good, e.g.,:
-                            //   x = (1, 2, (3, 4, 5, 6, (7, 8, 9, None)))
-                            //if (myViz.structurallyEquivalent(heapObj, curEntry.heap[childID])) {
-                            //  updateCurLayout(childID, curRow, newRow);
-                            //}
                             if (myViz.params.disableHeapNesting) {
                                 updateCurLayout(childID, [], []);
                             }

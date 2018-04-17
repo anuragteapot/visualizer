@@ -1,13 +1,3 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
-
-/* TODO
-
-- test the resizeContainer option
-
-*/
-
 require('../css/opt-frontend.css');
 
 // need to directly import the class for typechecking to work

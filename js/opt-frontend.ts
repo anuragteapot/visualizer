@@ -1,26 +1,6 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
-
-/* TODO:
-
-- parse Java viz_options in users' java code:
-  https://github.com/daveagp/java_visualize/blob/1489078712310eda44391f09405e0f71b2b190c9/jv-frontend.js#L101
-
-  - implement other missing Java functionality while i'm at it :0
-    - also implement these options and stdin support too:
-      var optionNames = ['showStringsAsObjects', 'showAllFields', 'disableNesting'];
-
-- we're referring to top-level CSS selectors on the page; maybe use a
-  this.domRoot pattern like in pytutor.ts?
-
-*/
-
-
-// for TypeScript
-declare var initCodeopticon: any; // FIX later when porting Codeopticon
-declare var codeopticonUsername: string; // FIX later when porting Codeopticon
-declare var codeopticonSession: string;  // FIX later when porting Codeopticon
+declare var initCodeopticon: any;
+declare var codeopticonUsername: string;
+declare var codeopticonSession: string; 
 
 require('./lib/jquery-3.0.0.min.js');
 
