@@ -20,6 +20,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
 	<link href="assets/css/HoldOn.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="login/css/style.css">
+	<link rel="icon" type="image/png" href="images/logo.png">
 </head>
 
 <body  id="body">
@@ -29,8 +30,9 @@ if(isset($_SESSION['u_username'])) {
 		<div id="save" ></div><input id="save-file" type="text" placeholder="File-name" value="<?php  if(isset($_SESSION['save-file'])) { echo $_SESSION['save-file']; } ?>"/>
 		<div id="logout" ><button id="logout_btn">Logout</button></div>
 		<div id="files" ><button id="files_btn" >My Files</button></div>
+		<div id="pro" ><button id="pro_btn" >Problems</button></div>
 	<?php
-		echo '<div id="user" ><p id="user_txt">Hi '.$_SESSION['u_name'].'</p></div>';	
+		echo '<div id="user" ><p id="user_txt">Hi '.$_SESSION['u_name'].'</p></div>';
 	}
 ?>
 		<header role="banner">
@@ -224,43 +226,7 @@ if(isset($_SESSION['u_username'])) {
 				</div>
 			</section>
 
-		<!-- Three -->
-			<section id="three" class="main style1 special">
-				<div class="container">
-					<header class="major">
-						<h2>Adipiscing amet consequat</h2>
-					</header>
-					<p>Ante nunc accumsan et aclacus nascetur ac ante amet sapien sed.</p>
-					<div class="row 150%">
-						<div class="4u 12u$(medium)">
-							<span class="image fit"><img src="images/pic02.jpg" alt="" /></span>
-							<h3>Magna feugiat lorem</h3>
-							<p>Adipiscing a commodo ante nunc magna lorem et interdum mi ante nunc lobortis non amet vis sed volutpat et nascetur.</p>
-							<ul class="actions">
-								<li><a href="#" class="button">More</a></li>
-							</ul>
-						</div>
-						<div class="4u 12u$(medium)">
-							<span class="image fit"><img src="images/pic03.jpg" alt="" /></span>
-							<h3>Magna feugiat lorem</h3>
-							<p>Adipiscing a commodo ante nunc magna lorem et interdum mi ante nunc lobortis non amet vis sed volutpat et nascetur.</p>
-							<ul class="actions">
-								<li><a href="#" class="button">More</a></li>
-							</ul>
-						</div>
-						<div class="4u$ 12u$(medium)">
-							<span class="image fit"><img src="images/pic04.jpg" alt="" /></span>
-							<h3>Magna feugiat lorem</h3>
-							<p>Adipiscing a commodo ante nunc magna lorem et interdum mi ante nunc lobortis non amet vis sed volutpat et nascetur.</p>
-							<ul class="actions">
-								<li><a href="#" class="button">More</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</section>
-
-		<!-- Four -->
+	<!-- Four -->
 			<section id="four" class="main style2 special">
 				<div class="container">
 					<header class="major">
@@ -288,14 +254,13 @@ if(isset($_SESSION['u_username'])) {
 					<li><a href="#" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
 				</ul>
 				<ul class="copyright">
-					<li>&copy; Untitled</li>
+					<li>&copy; Anurag</li>
 				</ul>
 			</section>
 
 
 			<section id="console" class="style2 special">
 				<div>
-
 					<div class="left">
 						<h1 id="con_text">&nbsp; > &nbsp; Console</h1>
 					</div>
@@ -331,19 +296,14 @@ if(isset($_SESSION['u_username'])) {
 				});
 
 				$(window).load(function(){
-
-							HoldOn.close();
-
+					HoldOn.close();
 				});
 			</script>
-
-
 			<script>
 
 				function console(){
 					//Output value
 					var output_el = document.getElementById('pyStdout').value;
-
 					//Output bind
 					var output_ex = document.getElementById('output_ex');
 					output_ex.value = output_el;
@@ -352,6 +312,7 @@ if(isset($_SESSION['u_username'])) {
 
 			<script>
 				$( document ).on( 'keydown', function ( e ) {
+
 					if(e.keyCode === 121) {
 							$("#pyInputPane").css({"max-width": ""});
 							$("#codeInputPane").css({"width": ""});
@@ -364,10 +325,20 @@ if(isset($_SESSION['u_username'])) {
 							$("#pyInputPane").css({"max-width": ""});
 							$("#codeInputPane").css({"width": ""});
 
+
 							$("#pyInputPane").css({"max-width": "1200px", "margin-left": "auto", "margin-right": "auto","margin-top":"0"});
 							$("#codeInputPane").css({"width": "1200px", "min-height": "600px", "border" : "0.5px solid black"});
 						}
+
+					if(e.keyCode === 37) {
+						$('#jmpStepBack').trigger('click');
+					}
+
+					if(e.keyCode === 39) {
+						$('#jmpStepFwd').trigger('click');
+					}
 				});
+
 			</script>
 
 			<script>
@@ -410,9 +381,7 @@ if(isset($_SESSION['u_username'])) {
 				}
 			</script>
 
-
 			<script>
-
 			document.addEventListener('DOMContentLoaded',function() {
 					var themeName = 'sk-rect';
 						HoldOn.open({

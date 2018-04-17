@@ -1,5 +1,5 @@
 <?php session_start();
-	
+
 	if(!isset($_SESSION['u_username']) || !isset($_GET['file'])){
 		header("Location: ../");
 	}
@@ -9,14 +9,14 @@
 
 
 if (isset($_GET['file']) && basename($_GET['file']) == $_GET['file']) {
-	$filename = $_GET['file'];
+	$filename = $_GET['file'].'.c';
 } else {
 	$filename = NULL;
 }
 
 if ($filename) {
 	// define the path to your download folder plus assign the file name
-	$path = '/opt/lampp/htdocs/project/vis/OnlinePythonTutor-master/v5-unity/uploads/'.$user.'/'.$filename;
+	$path = '/opt/lampp/htdocs/project/visualizer/uploads/'.$user.'/'.$filename;
 	// check that file exists and is readable
 	if (file_exists($path) && is_readable($path)) {
 		// get the file size and send the http headers
@@ -32,6 +32,8 @@ if ($filename) {
 			// stream the file and exit the script when complete
 			fpassthru($file);
 			exit;
-		} 
-	} 
+		}
+	}
+} else {
+	echo 'Server Error';
 }

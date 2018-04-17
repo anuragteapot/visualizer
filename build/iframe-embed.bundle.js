@@ -554,56 +554,26 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAADwCAMAAADY
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, jQuery) {
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
 Object.defineProperty(exports, "__esModule", { value: true });
-/* TODO:
-
-- substitute in a non-live version of the live editor from opt-live.js
-  in addition to the janky current version of the editor
-
-*/
-/* pytutor coding gotchas:
-
-- *NEVER* use raw $(__) or d3.select(__) statements to select DOM elements.
-
-  *ALWAYS* use myViz.domRoot or myViz.domRootD3 for jQuery and D3, respectively.
-
-  Otherwise things will break in weird ways when you have more than one
-  visualization embedded within a webpage, due to multiple matches in
-  the global namespace.
-
-- always use generateID and generateHeapObjID to generate unique CSS
-  IDs, or else things will break when multiple ExecutionVisualizer
-  instances are on a webpage
-
-*/
 __webpack_require__(8);
 __webpack_require__(0);
-__webpack_require__(11); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR
+__webpack_require__(11);
 __webpack_require__(9);
 __webpack_require__(15);
-__webpack_require__(10); // contains slight pgbovine modifications
+__webpack_require__(10);
 __webpack_require__(14);
 exports.SVG_ARROW_POLYGON = '0,3 12,3 12,0 18,5 12,10 12,7 0,7';
-var SVG_ARROW_HEIGHT = 10; // must match height of SVG_ARROW_POLYGON
-/* colors - see pytutor.css for more colors */
+var SVG_ARROW_HEIGHT = 10;
 exports.brightRed = '#e93f34';
-var connectorBaseColor = '#005583';
+var connectorBaseColor = '#e93f34';
 var connectorHighlightColor = exports.brightRed;
 var connectorInactiveColor = '#cccccc';
 var errorColor = exports.brightRed;
 var breakpointColor = exports.brightRed;
-// Unicode arrow types: '\u21d2', '\u21f0', '\u2907'
 exports.darkArrowColor = exports.brightRed;
-exports.lightArrowColor = '#c9e6ca';
+exports.lightArrowColor = '#e93f34';
 var heapPtrSrcRE = /__heap_pointer_src_/;
-var rightwardNudgeHack = true; // suggested by John DeNero, toggle with global
-// returns a list of length a.length * b.length with elements from both
-// mixed. the elements of a and b should be primitives, but if the first element
-// is a list, it flattens it. e.g.,:
-//   multiplyLists([1, 2, 3], [4, 5]) -> [[1,4], [1,5], [2,4], [2,5], [3,4], [3,5]]
+var rightwardNudgeHack = true;
 function multiplyLists(a, b) {
     var ret = [];
     for (var i = 0; i < a.length; i++) {
@@ -622,58 +592,8 @@ function multiplyLists(a, b) {
 }
 // the main event!
 var ExecutionVisualizer = /** @class */ (function () {
-    // Constructor with an ever-growing feature-crepped list of options :)
-    // domRootID is the string ID of the root element where to render this instance
-    //
-    // dat is data returned by the Python Tutor backend consisting of two fields:
-    //   code  - string of executed code
-    //   trace - a full execution trace
-    //
-    // params is an object containing optional parameters, such as:
-    //   jumpToEnd - if non-null, jump to the very end of execution if
-    //               there's no error, or if there's an error, jump to the
-    //               FIRST ENTRY with an error
-    //   startingInstruction - the (zero-indexed) execution point to display upon rendering
-    //                         if this is set, then it *overrides* jumpToEnd
-    //   codeDivHeight - maximum height of #pyCodeOutputDiv (in integer pixels)
-    //   codeDivWidth  - maximum width  of #pyCodeOutputDiv (in integer pixels)
-    //   editCodeBaseURL - the base URL to visit when the user clicks 'Edit code' (if null, then 'Edit code' link hidden)
-    //   embeddedMode         - shortcut for codeDivWidth=DEFAULT_EMBEDDED_CODE_DIV_WIDTH,
-    //                                       codeDivHeight=DEFAULT_EMBEDDED_CODE_DIV_HEIGHT
-    //                          (and hide a bunch of other stuff & don't activate keyboard shortcuts!)
-    //   disableHeapNesting   - if true, then render all heap objects at the top level (i.e., no nested objects)
-    //   drawParentPointers   - if true, then draw environment diagram parent pointers for all frames
-    //                          WARNING: there are hard-to-debug MEMORY LEAKS associated with activating this option
-    //   textualMemoryLabels  - render references using textual memory labels rather than as jsPlumb arrows.
-    //                          this is good for slow browsers or when used with disableHeapNesting
-    //                          to prevent "arrow overload"
-    //   updateOutputCallback - function to call (with 'this' as parameter)
-    //                          whenever this.updateOutput() is called
-    //                          (BEFORE rendering the output display)
-    //   heightChangeCallback - function to call (with 'this' as parameter)
-    //                          whenever the HEIGHT of #dataViz changes
-    //   verticalStack - if true, then stack code display ON TOP of visualization
-    //                   (else place side-by-side)
-    //   visualizerIdOverride - override visualizer ID instead of auto-assigning it
-    //                          (BE CAREFUL ABOUT NOT HAVING DUPLICATE IDs ON THE SAME PAGE,
-    //                           OR ELSE ARROWS AND OTHER STUFF WILL GO HAYWIRE!)
-    //   executeCodeWithRawInputFunc - function to call when you want to re-execute the given program
-    //                                 with some new user input (somewhat hacky!)
-    //   compactFuncLabels - render functions with a 'func' prefix and no type label
-    //   showAllFrameLabels - display frame and parent frame labels for all functions (default: false)
-    //   hideCode - hide the code display and show only the data structure viz
-    //   lang - to render labels in a style appropriate for other languages,
-    //          and to display the proper language in langDisplayDiv:
-    //          'py2' for Python 2, 'py3' for Python 3, 'js' for JavaScript, 'java' for Java,
-    //          'ts' for TypeScript, 'ruby' for Ruby, 'c' for C, 'cpp' for C++
-    //          [default is Python-style labels]
     function ExecutionVisualizer(domRootID, dat, params) {
         this.params = {};
-        // an array of objects with the following fields:
-        //   'text' - the text of the line of code
-        //   'lineNumber' - one-indexed (always the array index + 1)
-        //   'executionPoints' - an ordered array of zero-indexed execution points where this line was executed
-        //   'breakpointHere' - has a breakpoint been set here?
         this.codeOutputLines = [];
         this.curInstr = 0;
         // API for adding a hook, created by David Pritchard
@@ -768,60 +688,12 @@ var ExecutionVisualizer = /** @class */ (function () {
         this.try_hook("end_constructor", { myViz: this });
         this.render(); // go for it!
     }
-    /* API for adding a hook, created by David Pritchard
-       https://github.com/daveagp
-  
-      [this documentation is a bit deprecated since Philip made try_hook a
-       method of ExecutionVisualizer, but the general ideas remain]
-  
-     An external user should call
-       add_pytutor_hook("hook_name_here", function(args) {...})
-     args will be a javascript object with several named properties;
-     this is meant to be similar to Python's keyword arguments.
-  
-     The hooked function should return an array whose first element is a boolean:
-     true if it completely handled the situation (no further hooks
-     nor the base function should be called); false otherwise (wasn't handled).
-     If the hook semantically represents a function that returns something,
-     the second value of the returned array is that semantic return value.
-  
-     E.g. for the Java visualizer a simplified version of a hook we use is:
-  
-    add_pytutor_hook(
-      "isPrimitiveType",
-      function(args) {
-        var obj = args.obj; // unpack
-        if (obj instanceof Array && obj[0] == "CHAR-LITERAL")
-          return [true, true]; // yes we handled it, yes it's primitive
-        return [false]; // didn't handle it, let someone else
-      });
-  
-     Hook callbacks can return false or undefined (i.e. no return
-     value) in lieu of [false].
-  
-     NB: If multiple functions are added to a hook, the oldest goes first. */
     ExecutionVisualizer.prototype.add_pytutor_hook = function (hook_name, func) {
         if (this.pytutor_hooks[hook_name])
             this.pytutor_hooks[hook_name].push(func);
         else
             this.pytutor_hooks[hook_name] = [func];
     };
-    /*  [this documentation is a bit deprecated since Philip made try_hook a
-         method of ExecutionVisualizer, but the general ideas remain]
-  
-    try_hook(hook_name, args): how the internal codebase invokes a hook.
-  
-    args will be a javascript object with several named properties;
-    this is meant to be similar to Python's keyword arguments. E.g.,
-  
-    function isPrimitiveType(obj) {
-      var hook_result = try_hook("isPrimitiveType", {obj:obj});
-      if (hook_result[0]) return hook_result[1];
-      // go on as normal if the hook didn't handle it
-  
-    Although add_pytutor_hook allows the hooked function to
-    return false or undefined, try_hook will always return
-    something with the strict format [false], [true] or [true, ...]. */
     ExecutionVisualizer.prototype.try_hook = function (hook_name, args) {
         if (this.pytutor_hooks[hook_name]) {
             for (var i = 0; i < this.pytutor_hooks[hook_name].length; i++) {
@@ -873,8 +745,6 @@ var ExecutionVisualizer = /** @class */ (function () {
             if (this.params.codeDivHeight === undefined) {
                 this.params.codeDivHeight = ExecutionVisualizer.DEFAULT_EMBEDDED_CODE_DIV_HEIGHT;
             }
-            // add an extra label to link back to the main site, so that viewers
-            // on the embedded page know that they're seeing an OPT visualization
             base.find('#codeFooterDocs').hide(); // cut out extraneous docs
         }
         // not enough room for these extra buttons ...
@@ -1597,40 +1467,7 @@ var DataVisualizer = /** @class */ (function () {
             renderedHeapObjectIDs: d3.map(),
         };
     };
-    // this method initializes curTraceLayouts
-    //
-    // Pre-compute the layout of top-level heap objects for ALL execution
-    // points as soon as a trace is first loaded. The reason why we want to
-    // do this is so that when the user steps through execution points, the
-    // heap objects don't "jiggle around" (i.e., preserving positional
-    // invariance). Also, if we set up the layout objects properly, then we
-    // can take full advantage of d3 to perform rendering and transitions.
     DataVisualizer.prototype.precomputeCurTraceLayouts = function () {
-        // curTraceLayouts is a list of top-level heap layout "objects" with the
-        // same length as curTrace after it's been fully initialized. Each
-        // element of curTraceLayouts is computed from the contents of its
-        // immediate predecessor, thus ensuring that objects don't "jiggle
-        // around" between consecutive execution points.
-        //
-        // Each top-level heap layout "object" is itself a LIST of LISTS of
-        // object IDs, where each element of the outer list represents a row,
-        // and each element of the inner list represents columns within a
-        // particular row. Each row can have a different number of columns. Most
-        // rows have exactly ONE column (representing ONE object ID), but rows
-        // containing 1-D linked data structures have multiple columns. Each
-        // inner list element looks something like ['row1', 3, 2, 1] where the
-        // first element is a unique row ID tag, which is used as a key for d3 to
-        // preserve "object constancy" for updates, transitions, etc. The row ID
-        // is derived from the FIRST object ID inserted into the row. Since all
-        // object IDs are unique, all row IDs will also be unique.
-        /* This is a good, simple example to test whether objects "jiggle"
-    
-        x = [1, [2, [3, None]]]
-        y = [4, [5, [6, None]]]
-    
-        x[1][1] = y[1]
-    
-        */
         this.curTraceLayouts = [];
         this.curTraceLayouts.push([]); // pre-seed with an empty sentinel to simplify the code
         var myViz = this; // to prevent confusion of 'this' inside of nested functions
@@ -1683,12 +1520,6 @@ var DataVisualizer = /** @class */ (function () {
                             return; // skip type tag
                         if (!myViz.isPrimitiveType(child)) {
                             var childID = getRefID(child);
-                            // comment this out to make "linked lists" that aren't
-                            // structurally equivalent look good, e.g.,:
-                            //   x = (1, 2, (3, 4, 5, 6, (7, 8, 9, None)))
-                            //if (myViz.structurallyEquivalent(heapObj, curEntry.heap[childID])) {
-                            //  updateCurLayout(childID, curRow, newRow);
-                            //}
                             if (myViz.params.disableHeapNesting) {
                                 updateCurLayout(childID, [], []);
                             }
@@ -3262,10 +3093,10 @@ var CodeDisplay = /** @class */ (function () {
         // also changed 'Edit code' link to 'Edit this code' to make
         // it more clear to users
         var codeDisplayHTML = '<div id="codeDisplayDiv">\
+      <div id="editCodeLinkDiv"><a id="editBtn" title="Edit Code"><img src="images/edit.png"></a>\
+      </div>\
          <div id="langDisplayDiv"></div>\
          <div id="pyCodeOutputDiv"/>\
-         <div id="editCodeLinkDiv"><a id="editBtn">Edit this code</a>\
-         </div>\
          <div id="legendDiv"/>\
          <div id="codeFooterDocs"></div>\
        </div>';
@@ -3273,9 +3104,6 @@ var CodeDisplay = /** @class */ (function () {
         if (this.owner.params.embeddedMode) {
             this.domRoot.find('#editCodeLinkDiv').css('font-size', '10pt');
         }
-        this.domRoot.find('#legendDiv')
-            .append('<svg id="prevLegendArrowSVG"/>  current line executes')
-            .append('<p style="margin-top: 4px"><svg id="curLegendArrowSVG"/> next line to execute</p>');
         this.domRootD3.select('svg#prevLegendArrowSVG')
             .append('polygon')
             .attr('points', exports.SVG_ARROW_POLYGON)
@@ -3334,10 +3162,10 @@ var CodeDisplay = /** @class */ (function () {
             }
             else if (lang === 'c') {
                 if (this.owner.params.embeddedMode) {
-                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+                    this.domRoot.find('#langDisplayDiv').html('');
                 }
                 else {
-                    this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+                    this.domRoot.find('#langDisplayDiv').html('');
                 }
             }
             else if (lang === 'cpp') {
@@ -3601,14 +3429,15 @@ var NavigationController = /** @class */ (function () {
                      <div id="executionSliderFooter"/>\
                      <div id="vcrControls">\
                      <span id="curInstr">Step ? of ?</span><br>\
-                       <button id="jmpFirstInstr", type="button" onclick="console()">&lt;&lt; First</button>\
-                       <button id="jmpStepBack", type="button" onclick="console()">&lt; Back</button>\
-                       <button id="jmpStepFwd", type="button" onclick="console()">Forward &gt;</button>\
-                       <button id="jmpLastInstr", type="button" onclick="console()">Last &gt;&gt;</button>\
+                       <button id="jmpFirstInstr", type="button" onclick="console()">First</button>\
+                       <button id="jmpStepBack", type="button" onclick="console()">Back</button>\
+                       <button id="jmpStepFwd", type="button" onclick="console()">Forward</button>\
+                       <button id="jmpLastInstr", type="button" onclick="console()">Last</button>\
                      </div>\
                      <div id="select_exc"><br>\
                      <h1>Select timer</h1>\
                        <select id="option_exc">\
+                          <option value="500">0.5 Sec</option>\
                           <option value="1000">1 Sec</option>\
                           <option value="2000">2 Sec</option>\
                           <option value="4000">4 Sec</option>\
@@ -3989,6 +3818,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
                 else {
                     _this.setFronendError(["Server error! Your code might be too long for this tool. Shorten your code and re-try. [#CodeTooLong]"]);
                     _this.num414Tries = 0; // reset this to 0 AFTER setFronendError so that in setFronendError we can know that it's a 414 error (super hacky!)
+                    _this.doneExecutingCode();
                 }
             }
             else {
@@ -4011,8 +3841,7 @@ var AbstractBaseFrontend = /** @class */ (function () {
     AbstractBaseFrontend.prototype.getAppState = function () { return {}; }; // NOP -- subclasses need to override
     AbstractBaseFrontend.prototype.setFronendError = function (lines, ignoreLog) {
         if (ignoreLog === void 0) { ignoreLog = false; }
-        $("#frontendErrorOutput").html(lines.map(pytutor_1.htmlspecialchars).join('<br/>') +
-            (ignoreLog ? '' : '<p/>Here is a list of <a target="_blank" href="https://github.com/pgbovine/OnlinePythonTutor/blob/master/unsupported-features.md">UNSUPPORTED FEATURES</a>'));
+        $("#output_ex").html(lines);
         // log it to the server as well (unless ignoreLog is on)
         if (!ignoreLog) {
             var errorStr = lines.join();
@@ -4311,69 +4140,6 @@ var AbstractBaseFrontend = /** @class */ (function () {
     return AbstractBaseFrontend;
 }()); // END class AbstractBaseFrontend
 exports.AbstractBaseFrontend = AbstractBaseFrontend;
-/* For survey questions. Versions of survey wording:
-
-[see ../../v3/js/opt-frontend-common.js for older versions of survey wording - v1 to v7]
-
-v8: (deployed on 2016-06-20) - like v7 except emphasize the main usage survey more, and have the over-60 survey as auxiliary
-const survey_v8 = '\n\
-<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
-<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1-aKilu0PECHZVRSIXHv8vJpEuKUO9uG3MrH864uX56U/viewform" target="_blank">filling out this user survey</a>.</span>\n\
-<br/>\n\
-<span style="font-size: 9pt;">If you are <b>at least 60 years old</b>, please also fill out <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank">our survey about learning programming</a>.</span>\n\
-</p>'
-
-v9: (deployed on 2016-08-14, taken down 2016-12-05) - only put up the "older adults" survey except generalize it to ALL ages, take down the OPT usage survey for now
-const survey_v9 = '\n\
-<p style="font-size: 10pt; margin-top: 10px; margin-bottom: 15px; line-height: 175%;">\n\
-<span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/1lrXsE04ghfX9wNzTVwm1Wc6gQ5I-B4uw91ACrbDhJs8/viewform" target="_blank"><b>filling out this user survey</b></a>.</span>\n\
-</p>'
-
-v10: (deployed on 2016-12-05) - survey of how native languages affects learning programming
-     (taken down on 2017-07-28)
-[see survey_v10 variable above]
-
-    // use ${this.userUUID} within the string ...
-    var survey_v10 = '\n\
-    <p style="font-size: 11pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
-    <span><span style="color: #e93f34;">Support our research and keep this tool free</span> by filling out this <a href="https://docs.google.com/forms/d/e/1FAIpQLSe48NsBZPvu1hrTBwc8-aSic7nPSxpsxFqpUxV5AN4LwnyJWg/viewform?entry.956368502=';
-    survey_v10 += this.userUUID;
-    survey_v10 += '" target="_blank">survey on how your native spoken language affects how you learn programming</a>.</span></p>';
-
-    $('#surveyPane').html(survey_v10);
-
-v11: labinthewild python debugging experiment (deployed on 2017-07-28, taken down on 2017-09-12)
-    var survey_v11 = `<p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">
-                        <span>
-                          <span style="color: #e93f34;">Support our research and practice Python</span>
-                          by trying our new
-                          <a target="_blank" href="http://www.labinthewild.org/studies/python_tutor/">debugging skill test</a>!`;
-
-v12: simplified demographic survey which is a simplified hybrid of the v8 general usage survey and the v10 native language survey (deployed on 2017-09-12)
-
-    // use ${this.userUUID} within the string ...
-    var survey_v12 = '\n\
-    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
-    <span>Support our research and keep this tool free by <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
-    survey_v12 += this.userUUID;
-    survey_v12 += '" target="_blank"><b>filling out this short user survey</b></a>.</span></p>';
-
-v13: same as v12 except with slightly different wording, and adding a
-call for donations (deployed on 2017-12-27)
-
-    // use ${this.userUUID} within the string ...
-    var survey_v13 = '\n\
-    <p style="font-size: 10pt; margin-top: 12px; margin-bottom: 15px; line-height: 150%;">\n\
-    <div style="margin-bottom: 12px;">Keep this tool free for everyone by <a href="http://pgbovine.net/support.htm" target="_blank"><b>making a small donation</b></a> <span style="font-size: 8pt;">(PayPal, Patreon, credit/debit card)</span></div>\
-    <span>Support our research by completing a <a href="https://docs.google.com/forms/d/e/1FAIpQLSfQJP1ojlv8XzXAvHz0al-J_Hs3GQu4XeblxT8EzS8dIzuaYA/viewform?entry.956368502=';
-    survey_v13 += this.userUUID;
-    survey_v13 += '" target="_blank"><b>short user survey</b></a></span></p>';
-
-
-v14: very similar to v13 (deployed on 2018-03-11)
-[see the survey_v14 variable]
-
-*/
 // misc utilities:
 // From http://stackoverflow.com/a/8809472
 function generateUUID() {

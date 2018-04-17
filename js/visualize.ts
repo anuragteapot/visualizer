@@ -1,7 +1,3 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
-
 import {OptFrontendSharedSessions,TogetherJS} from './opt-shared-sessions';
 import {assert,htmlspecialchars} from './pytutor';
 import {OptTestcases,redSadFace,yellowHappyFace} from './opt-testcases';
@@ -171,11 +167,8 @@ export class OptFrontendWithTestcases extends OptFrontendSharedSessions {
                                    runTestCaseCallback.bind(this));
   }
 
-  // TODO: properly handle and display errors when there's a syntax
-  // error ... right now it displays as a syntax error in the main pane,
-  // which can be confusing
+
   vizTestCase(id, codeToExec, firstTestLine) {
-    // adapted from executeCode in opt-frontend.js
     var backendOptionsObj = this.getBaseBackendOptionsObj();
     var frontendOptionsObj = this.getBaseFrontendOptionsObj();
 
@@ -234,9 +227,7 @@ export class OptFrontendWithTestcases extends OptFrontendSharedSessions {
         var myArgs = that.getAppState();
         var buttonPrompt = $(this).html();
         var res = prompt(eureka_prompt);
-        // don't do ajax call when Cancel button is pressed
-        // (note that if OK button is pressed with no response, then an
-        // empty string will still be sent to the server)
+
         if (res !== null) {
           (myArgs as any).surveyVersion = eureka_survey_version;
           (myArgs as any).surveyQuestion = buttonPrompt;
@@ -249,12 +240,6 @@ export class OptFrontendWithTestcases extends OptFrontendSharedSessions {
     }
   }
 
-  // called whenever myVisualizer.updateOutput() is called to update the visualization;
-  // set prevExecutionRuntimeErrorMsg / line / code if the user has stepped to a trace
-  // entry that contains an error message. the rationale for doing this
-  // is that we want to display only errors that the user has stepped to
-  // and seen with their own eyes so that they can hopefully know what the
-  // error message is referring to ...
   updateOutputCallbackFunc() {
     super.updateOutputCallbackFunc();
     if (this.myVisualizer) {
@@ -267,10 +252,8 @@ export class OptFrontendWithTestcases extends OptFrontendSharedSessions {
     }
   }
 
-  // created on 2015-04-18
   experimentalPopUpSyntaxErrorSurvey() {
     if (this.prevExecutionExceptionObjLst.length > 0) {
-      // work with the most recent entry
       var prevExecutionExceptionObj = this.prevExecutionExceptionObjLst[this.prevExecutionExceptionObjLst.length - 1];
       var offendingLine = prevExecutionExceptionObj.killerException.line;
 
@@ -317,39 +300,6 @@ export class OptFrontendWithTestcases extends OptFrontendSharedSessions {
         }
       });
 
-      /*
-      var version = 'v3'; // deployed on 2015-09-08
-      var surveyBubbleHTML = '<div id="syntaxErrBubbleContents">\
-                                <div id="syntaxErrHeader">You just fixed the following error:</div>\
-                                <div id="syntaxErrCodeDisplay"></div>\
-                                <div id="syntaxErrMsg"></div>\
-                                <div id="syntaxErrQuestion">\
-                                  Please help us improve error messages for future users.\
-                                   If you think the above message wasn\'t helpful, what would have been the best message for you here?<br/>\
-                                   <input type="text" id="syntaxErrTxtInput" size=60 maxlength=150/><br/>\
-                                   <button id="syntaxErrSubmitBtn" type="button">Submit</button>\
-                                   <button id="syntaxErrCloseBtn" type="button">Close</button>\
-                                   <a href="#" id="syntaxErrHideAllLink">Hide all of these pop-ups</a>\
-                                </div>\
-                              </div>'
-      */
-
-      /*
-      var version = 'v4'; // deployed on 2017-05-15
-      var surveyBubbleHTML = '<div id="syntaxErrBubbleContents">\
-                                <div id="syntaxErrHeader">You just fixed the following error:</div>\
-                                <div id="syntaxErrCodeDisplay"></div>\
-                                <div id="syntaxErrMsg"></div>\
-                                <div id="syntaxErrQuestion">\
-                                  Please help us improve this tool.\
-                                  What would have been the most helpful error message for you to see here?<br/>\
-                                   <input type="text" id="syntaxErrTxtInput" size=62 maxlength=150/><br/>\
-                                   <button id="syntaxErrSubmitBtn" type="button">Submit</button>\
-                                   <button id="syntaxErrCloseBtn" type="button">Close</button>\
-                                   <a href="#" id="syntaxErrHideAllLink">Hide all of these pop-ups</a>\
-                                </div>\
-                              </div>'
-      */
 
       var version = 'v5'; // deployed on 2017-05-20
       // directly ask about what they thought caused the error instead of having them (indirectly)

@@ -1,38 +1,9 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
-
-/* TODO:
-
-- substitute in a non-live version of the live editor from opt-live.js
-  in addition to the janky current version of the editor
-
-*/
-
-
-/* pytutor coding gotchas:
-
-- *NEVER* use raw $(__) or d3.select(__) statements to select DOM elements.
-
-  *ALWAYS* use myViz.domRoot or myViz.domRootD3 for jQuery and D3, respectively.
-
-  Otherwise things will break in weird ways when you have more than one
-  visualization embedded within a webpage, due to multiple matches in
-  the global namespace.
-
-- always use generateID and generateHeapObjID to generate unique CSS
-  IDs, or else things will break when multiple ExecutionVisualizer
-  instances are on a webpage
-
-*/
-
-
 require('./lib/d3.v2.min.js');
 require('./lib/jquery-3.0.0.min.js');
-require('./lib/jquery.jsPlumb-1.3.10-all-min.js'); // DO NOT UPGRADE ABOVE 1.3.10 OR ELSE BREAKAGE WILL OCCUR
+require('./lib/jquery.jsPlumb-1.3.10-all-min.js');
 require('./lib/jquery-ui-1.11.4/jquery-ui.js');
 require('./lib/jquery-ui-1.11.4/jquery-ui.css');
-require('./lib/jquery.ba-bbq.js'); // contains slight pgbovine modifications
+require('./lib/jquery.ba-bbq.js');
 require('../css/pytutor');
 
 
@@ -42,27 +13,20 @@ declare var jsPlumb: any;
 
 
 export var SVG_ARROW_POLYGON = '0,3 12,3 12,0 18,5 12,10 12,7 0,7';
-var SVG_ARROW_HEIGHT = 10; // must match height of SVG_ARROW_POLYGON
-
-/* colors - see pytutor.css for more colors */
+var SVG_ARROW_HEIGHT = 10;
 export var brightRed = '#e93f34';
-var connectorBaseColor = '#005583';
+var connectorBaseColor = '#e93f34';
 var connectorHighlightColor = brightRed;
 var connectorInactiveColor = '#cccccc';
 var errorColor = brightRed;
 var breakpointColor = brightRed;
 
-// Unicode arrow types: '\u21d2', '\u21f0', '\u2907'
 export var darkArrowColor = brightRed;
-export var lightArrowColor = '#c9e6ca';
+export var lightArrowColor = '#e93f34';
 
 var heapPtrSrcRE = /__heap_pointer_src_/;
-var rightwardNudgeHack = true; // suggested by John DeNero, toggle with global
+var rightwardNudgeHack = true;
 
-// returns a list of length a.length * b.length with elements from both
-// mixed. the elements of a and b should be primitives, but if the first element
-// is a list, it flattens it. e.g.,:
-//   multiplyLists([1, 2, 3], [4, 5]) -> [[1,4], [1,5], [2,4], [2,5], [3,4], [3,5]]
 function multiplyLists(a, b) {
   var ret = [];
   for (var i = 0; i < a.length; i++) {
@@ -90,11 +54,6 @@ export class ExecutionVisualizer {
   curInputCode: string;
   curTrace: any[];
 
-  // an array of objects with the following fields:
-  //   'text' - the text of the line of code
-  //   'lineNumber' - one-indexed (always the array index + 1)
-  //   'executionPoints' - an ordered array of zero-indexed execution points where this line was executed
-  //   'breakpointHere' - has a breakpoint been set here?
   codeOutputLines: {text: string, lineNumber: number, executionPoints: number[], breakpointHere: boolean}[] = [];
 
   promptForUserInput: boolean;
@@ -138,51 +97,6 @@ export class ExecutionVisualizer {
   breakpoints: d3.Map<{}> = d3.map(); // set of execution points to set as breakpoints
   sortedBreakpointsList: any[] = [];  // sorted and synced with breakpoints
 
-  // Constructor with an ever-growing feature-crepped list of options :)
-  // domRootID is the string ID of the root element where to render this instance
-  //
-  // dat is data returned by the Python Tutor backend consisting of two fields:
-  //   code  - string of executed code
-  //   trace - a full execution trace
-  //
-  // params is an object containing optional parameters, such as:
-  //   jumpToEnd - if non-null, jump to the very end of execution if
-  //               there's no error, or if there's an error, jump to the
-  //               FIRST ENTRY with an error
-  //   startingInstruction - the (zero-indexed) execution point to display upon rendering
-  //                         if this is set, then it *overrides* jumpToEnd
-  //   codeDivHeight - maximum height of #pyCodeOutputDiv (in integer pixels)
-  //   codeDivWidth  - maximum width  of #pyCodeOutputDiv (in integer pixels)
-  //   editCodeBaseURL - the base URL to visit when the user clicks 'Edit code' (if null, then 'Edit code' link hidden)
-  //   embeddedMode         - shortcut for codeDivWidth=DEFAULT_EMBEDDED_CODE_DIV_WIDTH,
-  //                                       codeDivHeight=DEFAULT_EMBEDDED_CODE_DIV_HEIGHT
-  //                          (and hide a bunch of other stuff & don't activate keyboard shortcuts!)
-  //   disableHeapNesting   - if true, then render all heap objects at the top level (i.e., no nested objects)
-  //   drawParentPointers   - if true, then draw environment diagram parent pointers for all frames
-  //                          WARNING: there are hard-to-debug MEMORY LEAKS associated with activating this option
-  //   textualMemoryLabels  - render references using textual memory labels rather than as jsPlumb arrows.
-  //                          this is good for slow browsers or when used with disableHeapNesting
-  //                          to prevent "arrow overload"
-  //   updateOutputCallback - function to call (with 'this' as parameter)
-  //                          whenever this.updateOutput() is called
-  //                          (BEFORE rendering the output display)
-  //   heightChangeCallback - function to call (with 'this' as parameter)
-  //                          whenever the HEIGHT of #dataViz changes
-  //   verticalStack - if true, then stack code display ON TOP of visualization
-  //                   (else place side-by-side)
-  //   visualizerIdOverride - override visualizer ID instead of auto-assigning it
-  //                          (BE CAREFUL ABOUT NOT HAVING DUPLICATE IDs ON THE SAME PAGE,
-  //                           OR ELSE ARROWS AND OTHER STUFF WILL GO HAYWIRE!)
-  //   executeCodeWithRawInputFunc - function to call when you want to re-execute the given program
-  //                                 with some new user input (somewhat hacky!)
-  //   compactFuncLabels - render functions with a 'func' prefix and no type label
-  //   showAllFrameLabels - display frame and parent frame labels for all functions (default: false)
-  //   hideCode - hide the code display and show only the data structure viz
-  //   lang - to render labels in a style appropriate for other languages,
-  //          and to display the proper language in langDisplayDiv:
-  //          'py2' for Python 2, 'py3' for Python 3, 'js' for JavaScript, 'java' for Java,
-  //          'ts' for TypeScript, 'ruby' for Ruby, 'c' for C, 'cpp' for C++
-  //          [default is Python-style labels]
   constructor(domRootID, dat, params) {
     this.curInputCode = dat.code.rtrim(); // kill trailing spaces
     this.params = params;
@@ -281,38 +195,6 @@ export class ExecutionVisualizer {
     this.render(); // go for it!
   }
 
-  /* API for adding a hook, created by David Pritchard
-     https://github.com/daveagp
-
-    [this documentation is a bit deprecated since Philip made try_hook a
-     method of ExecutionVisualizer, but the general ideas remain]
-
-   An external user should call
-     add_pytutor_hook("hook_name_here", function(args) {...})
-   args will be a javascript object with several named properties;
-   this is meant to be similar to Python's keyword arguments.
-
-   The hooked function should return an array whose first element is a boolean:
-   true if it completely handled the situation (no further hooks
-   nor the base function should be called); false otherwise (wasn't handled).
-   If the hook semantically represents a function that returns something,
-   the second value of the returned array is that semantic return value.
-
-   E.g. for the Java visualizer a simplified version of a hook we use is:
-
-  add_pytutor_hook(
-    "isPrimitiveType",
-    function(args) {
-      var obj = args.obj; // unpack
-      if (obj instanceof Array && obj[0] == "CHAR-LITERAL")
-        return [true, true]; // yes we handled it, yes it's primitive
-      return [false]; // didn't handle it, let someone else
-    });
-
-   Hook callbacks can return false or undefined (i.e. no return
-   value) in lieu of [false].
-
-   NB: If multiple functions are added to a hook, the oldest goes first. */
   add_pytutor_hook(hook_name, func) {
     if (this.pytutor_hooks[hook_name])
       this.pytutor_hooks[hook_name].push(func);
@@ -320,22 +202,6 @@ export class ExecutionVisualizer {
       this.pytutor_hooks[hook_name] = [func];
   }
 
-  /*  [this documentation is a bit deprecated since Philip made try_hook a
-       method of ExecutionVisualizer, but the general ideas remain]
-
-  try_hook(hook_name, args): how the internal codebase invokes a hook.
-
-  args will be a javascript object with several named properties;
-  this is meant to be similar to Python's keyword arguments. E.g.,
-
-  function isPrimitiveType(obj) {
-    var hook_result = try_hook("isPrimitiveType", {obj:obj});
-    if (hook_result[0]) return hook_result[1];
-    // go on as normal if the hook didn't handle it
-
-  Although add_pytutor_hook allows the hooked function to
-  return false or undefined, try_hook will always return
-  something with the strict format [false], [true] or [true, ...]. */
   try_hook(hook_name, args) {
     if (this.pytutor_hooks[hook_name]) {
       for (var i=0; i<this.pytutor_hooks[hook_name].length; i++) {
@@ -398,8 +264,6 @@ export class ExecutionVisualizer {
         this.params.codeDivHeight = ExecutionVisualizer.DEFAULT_EMBEDDED_CODE_DIV_HEIGHT;
       }
 
-      // add an extra label to link back to the main site, so that viewers
-      // on the embedded page know that they're seeing an OPT visualization
       base.find('#codeFooterDocs').hide(); // cut out extraneous docs
     }
 
@@ -1248,41 +1112,9 @@ class DataVisualizer {
     };
   }
 
-  // this method initializes curTraceLayouts
-  //
-  // Pre-compute the layout of top-level heap objects for ALL execution
-  // points as soon as a trace is first loaded. The reason why we want to
-  // do this is so that when the user steps through execution points, the
-  // heap objects don't "jiggle around" (i.e., preserving positional
-  // invariance). Also, if we set up the layout objects properly, then we
-  // can take full advantage of d3 to perform rendering and transitions.
+
   precomputeCurTraceLayouts() {
-    // curTraceLayouts is a list of top-level heap layout "objects" with the
-    // same length as curTrace after it's been fully initialized. Each
-    // element of curTraceLayouts is computed from the contents of its
-    // immediate predecessor, thus ensuring that objects don't "jiggle
-    // around" between consecutive execution points.
-    //
-    // Each top-level heap layout "object" is itself a LIST of LISTS of
-    // object IDs, where each element of the outer list represents a row,
-    // and each element of the inner list represents columns within a
-    // particular row. Each row can have a different number of columns. Most
-    // rows have exactly ONE column (representing ONE object ID), but rows
-    // containing 1-D linked data structures have multiple columns. Each
-    // inner list element looks something like ['row1', 3, 2, 1] where the
-    // first element is a unique row ID tag, which is used as a key for d3 to
-    // preserve "object constancy" for updates, transitions, etc. The row ID
-    // is derived from the FIRST object ID inserted into the row. Since all
-    // object IDs are unique, all row IDs will also be unique.
 
-    /* This is a good, simple example to test whether objects "jiggle"
-
-    x = [1, [2, [3, None]]]
-    y = [4, [5, [6, None]]]
-
-    x[1][1] = y[1]
-
-    */
     this.curTraceLayouts = [];
     this.curTraceLayouts.push([]); // pre-seed with an empty sentinel to simplify the code
 
@@ -1345,12 +1177,6 @@ class DataVisualizer {
             if (!myViz.isPrimitiveType(child)) {
               var childID = getRefID(child);
 
-              // comment this out to make "linked lists" that aren't
-              // structurally equivalent look good, e.g.,:
-              //   x = (1, 2, (3, 4, 5, 6, (7, 8, 9, None)))
-              //if (myViz.structurallyEquivalent(heapObj, curEntry.heap[childID])) {
-              //  updateCurLayout(childID, curRow, newRow);
-              //}
               if (myViz.params.disableHeapNesting) {
                 updateCurLayout(childID, [], []);
               }
@@ -3201,10 +3027,10 @@ class CodeDisplay {
     // it more clear to users
     var codeDisplayHTML =
       '<div id="codeDisplayDiv">\
+      <div id="editCodeLinkDiv"><a id="editBtn" title="Edit Code"><img src="images/edit.png"></a>\
+      </div>\
          <div id="langDisplayDiv"></div>\
          <div id="pyCodeOutputDiv"/>\
-         <div id="editCodeLinkDiv"><a id="editBtn">Edit this code</a>\
-         </div>\
          <div id="legendDiv"/>\
          <div id="codeFooterDocs"></div>\
        </div>';
@@ -3213,9 +3039,6 @@ class CodeDisplay {
     if (this.owner.params.embeddedMode) {
       this.domRoot.find('#editCodeLinkDiv').css('font-size', '10pt');
     }
-    this.domRoot.find('#legendDiv')
-        .append('<svg id="prevLegendArrowSVG"/>  current line executes')
-        .append('<p style="margin-top: 4px"><svg id="curLegendArrowSVG"/> next line to execute</p>');
     this.domRootD3.select('svg#prevLegendArrowSVG')
         .append('polygon')
         .attr('points', SVG_ARROW_POLYGON)
@@ -3268,9 +3091,9 @@ class CodeDisplay {
         this.domRoot.find('#langDisplayDiv').html('Python 3.6');
       } else if (lang === 'c') {
         if (this.owner.params.embeddedMode) {
-          this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+          this.domRoot.find('#langDisplayDiv').html('');
         } else {
-          this.domRoot.find('#langDisplayDiv').html('C (gcc 4.8, C11)');
+          this.domRoot.find('#langDisplayDiv').html('');
         }
       } else if (lang === 'cpp') {
         if (this.owner.params.embeddedMode) {
@@ -3564,14 +3387,15 @@ class NavigationController {
                      <div id="executionSliderFooter"/>\
                      <div id="vcrControls">\
                      <span id="curInstr">Step ? of ?</span><br>\
-                       <button id="jmpFirstInstr", type="button" onclick="console()">&lt;&lt; First</button>\
-                       <button id="jmpStepBack", type="button" onclick="console()">&lt; Back</button>\
-                       <button id="jmpStepFwd", type="button" onclick="console()">Forward &gt;</button>\
-                       <button id="jmpLastInstr", type="button" onclick="console()">Last &gt;&gt;</button>\
+                       <button id="jmpFirstInstr", type="button" onclick="console()">First</button>\
+                       <button id="jmpStepBack", type="button" onclick="console()">Back</button>\
+                       <button id="jmpStepFwd", type="button" onclick="console()">Forward</button>\
+                       <button id="jmpLastInstr", type="button" onclick="console()">Last</button>\
                      </div>\
                      <div id="select_exc"><br>\
                      <h1>Select timer</h1>\
                        <select id="option_exc">\
+                          <option value="500">0.5 Sec</option>\
                           <option value="1000">1 Sec</option>\
                           <option value="2000">2 Sec</option>\
                           <option value="4000">4 Sec</option>\

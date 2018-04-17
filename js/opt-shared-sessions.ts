@@ -1,15 +1,3 @@
-// Python Tutor: https://github.com/pgbovine/OnlinePythonTutor/
-// Copyright (C) Philip Guo (philip@pgbovine.net)
-// LICENSE: https://github.com/pgbovine/OnlinePythonTutor/blob/master/LICENSE.txt
-
-// Implements shared sessions (a.k.a. Codechella)
-
-// VERY IMPORTANT to grab the value of togetherjsInUrl before loading
-// togetherjs-min.js, since loading that file deletes #togetherjs from URL
-// NB: kinda gross global
-//
-// if this is true, this means that you JOINED SOMEONE ELSE'S SESSION
-// rather than starting your own session
 var togetherjsInUrl = !!(window.location.hash.match(/togetherjs=/)); // turn into bool
 if (togetherjsInUrl) {
   console.log("togetherjsInUrl!");
