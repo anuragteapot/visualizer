@@ -19,8 +19,11 @@
 <div id="container">
   <header>
     <h1>Codeforces Problems</h1>
-    <button id="btn" class=".btn-primary">Get Problems</button>
+
 <div id="select-main">
+	<div id="filter">
+	<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search .." title="Type in a name">
+	</div>
     <div id="select">
       <select id="num">
         <option value="0">Default</option>
@@ -55,12 +58,11 @@
         <option value="geometry">geometry</option>
         <option value="*special">*Special</option>
       </select>
+			<button id="btn" class=".btn-primary">Get Problems</button>
     </div>
   </div>
 </header>
-
-  <h2>Table</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" id="top">
   <table class="table">
     <thead>
       <tr>
@@ -83,5 +85,24 @@
 <script type="text/javascript" src="js/main.js" ></script>
 <script type="text/javascript" src="js/sha512.js"></script>
 <script type="text/javascript" src="js/HoldOn.js"></script>
+
+<script>
+function myFunction() {
+  var input, filter, ul, li, a, i;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  ul = document.getElementById("set");
+  li = ul.getElementsByTagName("tr");
+  for (i = 0; i < li.length; i++) {
+    a = li[i].getElementsByTagName("td")[2];
+    if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
+      li[i].style.display = "";
+    } else {
+      li[i].style.display = "none";
+    }
+  }
+}
+</script>
+
 
 </html>
