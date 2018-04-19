@@ -28,6 +28,7 @@ var data;
     if (ourRequest.status >= 200 && ourRequest.status < 400) {
       var ourData = JSON.parse(ourRequest.responseText);
       HoldOn.close();
+      console.log(ourData);
       data = ourData;
       renderHTML(ourData);
     } else {
