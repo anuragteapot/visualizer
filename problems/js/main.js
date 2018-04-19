@@ -28,6 +28,7 @@ var data;
     if (ourRequest.status >= 200 && ourRequest.status < 400) {
       var ourData = JSON.parse(ourRequest.responseText);
       HoldOn.close();
+      console.log(ourData);
       data = ourData;
       renderHTML(ourData);
     } else {
@@ -117,5 +118,22 @@ function renderHTML(data) {
   }
   animalContainer.insertAdjacentHTML('beforeend', htmlString);
 }
+
+function myFunction() {
+  var input, filter, ul, li, a, i;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  ul = document.getElementById("set");
+  li = ul.getElementsByTagName("tr");
+  for (i = 0; i < li.length; i++) {
+    a = li[i].getElementsByTagName("td")[2];
+    if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
+      li[i].style.display = "";
+    } else {
+      li[i].style.display = "none";
+    }
+  }
+}
+
 
 });

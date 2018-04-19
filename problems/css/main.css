@@ -9,6 +9,9 @@ html, body {
   transform: scale(.75);
 }
 
+header{
+  text-align: center;
+}
 h1 {
   margin-top: 0;
   font-size: 2.4em;
@@ -25,28 +28,17 @@ button {
   background-color: #046380;
   color: #FFF;
   border: none;
-  padding: 10px 15px;
+  padding: 5px 15px;
   font-size: 15px;
   border-radius: 4px;
   cursor: pointer;
   outline: none;
-  margin-bottom: 10px;
-  margin-left: 18px;
   transition: opacity .4s ease-out, transform .4s ease-out, visibility .4s ease-out;
   position: relative;
-  top: -10px;
 }
 
-button:hover {
-  background-color: #034F66;
-}
-
-button:active {
-  background-color: #034154;
-  box-shadow: none;
-  position: relative;
-  top: -8px;
-  left: 2px;
+#top{
+  margin-top:10px; 
 }
 
 p {
@@ -64,4 +56,8 @@ p {
 
 #select-main{
   text-align: right;
+}
+
+#filter{
+  position: absolute;
 }
