@@ -1,6 +1,14 @@
 # visualizer
 Algorithm visualiser written in C.
 
+
+[![ScreenShot](https://github.com/Anu1601CS/visualizer/blob/dev/images/3.png)](#features)
+
+[![ScreenShot](https://github.com/Anu1601CS/visualizer/blob/dev/images/2.png)](#features)
+
+[![ScreenShot](https://github.com/Anu1601CS/visualizer/blob/dev/images/1.png)](#features)
+
+
 # Installation
 If you want develophment enviroment. 
 
