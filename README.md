@@ -10,7 +10,7 @@ Algorithm visualiser written in C.
 
 
 # Installation
-If you want develophment enviroment. 
+If you want development environment. 
 
 1. Download master branch.
 
