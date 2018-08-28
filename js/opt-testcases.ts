@@ -1,6 +1,5 @@
-export const redSadFace = require('./images/red-sad-face.jpg');
-export const yellowHappyFace = require('./images/yellow-happy-face.jpg');
-
+export const redSadFace = '';
+export const yellowHappyFace = '';
 
 const testcasesPaneHtml = '\
 <table id="testCasesTable">\

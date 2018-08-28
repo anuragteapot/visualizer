@@ -2,8 +2,16 @@
 # visualizer
 Line By Line Code Visualizer
 
+
+[![ScreenShot](https://github.com/Anu1601CS/visualizer/blob/dev/images/3.png)](#features)
+
+[![ScreenShot](https://github.com/Anu1601CS/visualizer/blob/dev/images/2.png)](#features)
+
+[![ScreenShot](https://github.com/Anu1601CS/visualizer/blob/dev/images/1.png)](#features)
+
+
 # Installation
-If you want develophment enviroment. 
+If you want development environment. 
 
 1. Download master branch.
 

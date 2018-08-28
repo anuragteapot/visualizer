@@ -5,7 +5,6 @@ var demoTrace = {"code": "def listSum(numbers):\n  if not numbers:\n    return 0
 
 
 $(document).ready(function() {
-  $("#cp-thumbnail").attr('src', require('./images/opt-v3-cs61a-embed-small.png'));
 
   var demoViz = new ExecutionVisualizer('demoViz', demoTrace, {embeddedMode: true,
                                                                lang: 'py2',

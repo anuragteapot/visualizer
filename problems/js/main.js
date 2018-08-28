@@ -9,7 +9,7 @@ var data;
   var themeName = 'sk-rect';
     HoldOn.open({
       theme:themeName,
-      message:"<h4>Loading....</h4>"
+      message:"<h4>Loading...</h4>"
     });
 
   var time = Date.now();

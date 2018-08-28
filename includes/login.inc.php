@@ -10,9 +10,7 @@ if(isset($_POST['email']) && isset($_POST['password']))
        $password=mysqli_real_escape_string($conn ,$_POST['password']);
        $password=md5($password);
        $confirm='1';
-
-        //Error handlers
-
+       
        if(empty($username) || empty($password))
        {
               $error="Required Inputs";
